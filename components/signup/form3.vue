@@ -87,7 +87,7 @@ const router = useRouter();
 
 const deviceHeight = ref(0);
 const emit = defineEmits(['updateDiv']);
-const timeLeft = ref(60);
+const timeLeft = ref(10);
 const rippleBtn = ref(null);
 const rippleBtnback = ref(null)
 const buttonText = ref("Next");
