@@ -1,0 +1,107 @@
+let data = {};
+
+function hexToBytes(hex) {
+  return Uint8Array.from(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+}
+
+function bytesToHex(bytes) {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+const encKeyHex = "71EDFC7A15740605432CA4D6488367E264AC73A426C76A1C1AB0A87673BB5BF1";
+
+export async function encryptionrequestdata(newData) {
+  const mergedData = {
+    ...data,
+    ...newData
+  };
+
+  const jsonData = JSON.stringify(mergedData);
+  const encoded = new TextEncoder().encode(jsonData);
+  const encKey = hexToBytes(encKeyHex);
+  const iv = crypto.getRandomValues(new Uint8Array(16));
+
+  const aesKey = await crypto.subtle.importKey(
+    'raw',
+    encKey,
+    { name: 'AES-CBC' },
+    false,
+    ['encrypt']
+  );
+
+  const cipherBuffer = await crypto.subtle.encrypt(
+    { name: 'AES-CBC', iv },
+    aesKey,
+    encoded
+  );
+
+  const hmacKey = await crypto.subtle.importKey(
+    'raw',
+    encKey,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const hmacBuffer = await crypto.subtle.sign(
+    'HMAC',
+    hmacKey,
+    new Uint8Array([...iv, ...new Uint8Array(cipherBuffer)])
+  );
+
+  const finalBuffer = new Uint8Array([
+    ...iv,
+    ...new Uint8Array(cipherBuffer),
+    ...new Uint8Array(hmacBuffer)
+  ]);
+
+  return bytesToHex(finalBuffer);
+}
+
+
+export async function decryptionresponse(hexString) {
+  const encKey = hexToBytes(encKeyHex);
+  const fullData = hexToBytes(hexString);
+
+  const iv = fullData.slice(0, 16);
+  const hmac = fullData.slice(-32); // SHA-256 = 32 bytes
+  const cipherBytes = fullData.slice(16, -32);
+
+  // Validate HMAC
+  const hmacKey = await crypto.subtle.importKey(
+    'raw',
+    encKey,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify']
+  );
+
+  const isValid = await crypto.subtle.verify(
+    'HMAC',
+    hmacKey,
+    hmac,
+    new Uint8Array([...iv, ...cipherBytes])
+  );
+
+  if (!isValid) {
+    throw new Error('HMAC verification failed – data may be tampered!');
+  }
+
+  // Decrypt AES-CBC
+  const aesKey = await crypto.subtle.importKey(
+    'raw',
+    encKey,
+    { name: 'AES-CBC' },
+    false,
+    ['decrypt']
+  );
+
+  const plainBuffer = await crypto.subtle.decrypt(
+    { name: 'AES-CBC', iv },
+    aesKey,
+    cipherBytes
+  );
+
+  const decoded = new TextDecoder().decode(plainBuffer);
+  return JSON.parse(decoded);
+}
