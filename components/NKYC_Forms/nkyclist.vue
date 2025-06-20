@@ -3,7 +3,7 @@
         <div class="w-full px-3 primary_color flex justify-between items-center"
             :style="{ height: deviceHeight * 0.08 + 'px' }">
 
-            <logo  />
+            <logo style="width: 40px; height: 40px;" />
             <profile />
 
         </div>
@@ -170,23 +170,32 @@ const handleButtonClick = () => {
             }
         }
         else {
-        const digiInfo = data?.payload?.metaData?.digi_info || [];
+       const digiInfo = data?.payload?.metaData?.digi_info ;
         const digiadd = data?.payload?.metaData?.digi_info.aadhaarUID
         const panInfo = data?.payload?.metaData?.kraPan?.APP_KRA_INFO;
 
-        if (digiInfo.length === 0 && digiadd) {
-          if (panInfo) {
+
+        if(panInfo){
             pagestatus('parmanentaddress');
-            emit('updateDiv', 'parmanentaddress');
-          } else {
-            pagestatus('ekyc');
-            emit('updateDiv', 'ekyc');
-          }
-        } else {
+          emit('updateDiv', 'parmanentaddress');
+        }
+
+        else if(digiInfo.length === 0){
+             pagestatus('ekyc');
+             emit('updateDiv', 'ekyc');
+        }
+        else if(digiadd){
           pagestatus('parmanentaddress');
           emit('updateDiv', 'parmanentaddress');
         }
+        else{
+             pagestatus('ekyc');
+             emit('updateDiv', 'ekyc');
         }
+
+     
+        }
+        
 
     }, 600)
 };
