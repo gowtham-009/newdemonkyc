@@ -131,8 +131,8 @@ onMounted(() => {
 
   window.addEventListener('resize', () => {
     const updatedHeight = window.innerHeight;
-    box1Height.value = showBox2.value ? updatedHeight * 0.3 : updatedHeight;
-    box2Height.value = showBox2.value ? updatedHeight * 0.7 : 0;
+    box1Height.value = showBox2.value ? updatedHeight * 0.2 : updatedHeight;
+    box2Height.value = showBox2.value ? updatedHeight * 0.8 : 0;
   });
 });
 
