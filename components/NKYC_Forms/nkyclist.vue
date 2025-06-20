@@ -171,9 +171,10 @@ const handleButtonClick = () => {
         }
         else {
         const digiInfo = data?.payload?.metaData?.digi_info || [];
+        const digiadd = data?.payload?.metaData?.digi_info.aadhaarUID
         const panInfo = data?.payload?.metaData?.kraPan?.APP_KRA_INFO;
 
-        if (digiInfo.length === 0) {
+        if (digiInfo.length === 0 && digiadd) {
           if (panInfo) {
             pagestatus('parmanentaddress');
             emit('updateDiv', 'parmanentaddress');
