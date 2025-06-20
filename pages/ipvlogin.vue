@@ -12,7 +12,10 @@
 <script setup>
 import { onMounted} from 'vue';
 const { baseurl } = globalurl();
+const {htoken}=headerToken()
+import { useRoute, useRouter } from 'vue-router'
 
+const router = useRouter()
 
 onMounted(() => {
   const queryString = window.location.search; // e.g. "?NDUw"
@@ -48,9 +51,13 @@ onMounted(() => {
     } else {
       console.log('✅ Base64 Value:', value);
       console.log('🔤 Decoded String:', decoded);
+         localStorage.removeItem('userkey')
+    router.push('/')
     }
   } else {
     console.log('❌ Not a Base64 value:', value);
+    localStorage.removeItem('userkey')
+    router.push('/')
   }
 });
 
@@ -61,7 +68,7 @@ const routeComponents = async (token) => {
      pageCode:'takephoto',
     userToken: token
   });
-
+  const headertoken=htoken
   const payload = { payload: user };
   const jsonString = JSON.stringify(payload);
   const apiurl = `${baseurl.value}ipv_login`;
@@ -70,7 +77,7 @@ const routeComponents = async (token) => {
     const response = await fetch(apiurl, {
       method: 'POST',
       headers: {
-        'Authorization': 'C58EC6E7053B95AEF7428D9C7A5DB2D892EBE2D746F81C0452F66C8920CDB3B1',
+        'Authorization': headertoken,
         'Content-Type': 'application/json',
       },
       body: jsonString,
@@ -82,13 +89,13 @@ const routeComponents = async (token) => {
 
     const data = await response.json();
   
-    if(data.payload.status=='ok' && data.payload.message=='IPV Login Successfull.'){
+    if(data.payload.status=='ok' && data.payload.metaData.token){
         localStorage.setItem('userkey',data.payload.metaData.token)
         if(data.payload.metaData.token){
           
             const page=await pagestatus('takephoto') 
             if(page.payload.status=='ok'){
-                 window.location.href='https://nkcynewone.vercel.app'
+               window.location.href='https://newdemonkyc.vercel.app'
             }
              
         }

@@ -227,7 +227,7 @@ const createEsign = async () => {
   const user = encryptionrequestdata({
     userToken: localStorage.getItem('userkey'),
     pageCode: 'esign',
-    redirectUrl: 'https://nkcynewone.vercel.app/main',
+    redirectUrl: 'https://newdemonkyc.vercel.app/main',
     esignAction: 'createEsign',
   });
 
