@@ -327,8 +327,6 @@ const headertoken=htoken
           emit('updateDiv', 'bankfile');
         }
       }
-
-
     }
 
       else if (data.payload.status == 'error') {
