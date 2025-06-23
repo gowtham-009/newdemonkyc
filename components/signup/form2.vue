@@ -199,6 +199,7 @@ const sendmobileotp = async (resend) => {
     }, 1000);
   if(resend=='resend'){
     otperror.value=false
+    p_otp.value=''
      resend_sh.value=true
   }
 
