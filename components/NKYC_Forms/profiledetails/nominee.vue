@@ -917,15 +917,16 @@ const handleButtonClick = (event) => {
    
     const mydata = await pagestatus('bank1')
     if (mydata.payload.status == 'ok') {
-      console.log("erioj",sharepercentage)
+       emit('updateDiv', 'bank1');
+      // console.log("erioj",sharepercentage)
 
-      if(sharepercentage<100){
-        errorpercent.value='Nominee 100 percentage not met'
+      // if(sharepercentage<100){
+      //   errorpercent.value='Nominee 100 percentage not met'
        
-      }
-      else{
-        emit('updateDiv', 'bank1');
-      }
+      // }
+      // else{
+       
+      // }
       
     }
     else if (mydata.payload.status == 'error') {
