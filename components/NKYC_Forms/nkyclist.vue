@@ -203,7 +203,6 @@ const handleButtonClick = () => {
 
 
 function back() {
-
     const button = rippleBtnback.value
     const circle = document.createElement('span')
     circle.classList.add('ripple')
