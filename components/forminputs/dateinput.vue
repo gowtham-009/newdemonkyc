@@ -9,6 +9,10 @@
       inputClass="custom-input"
       :manualInput="true"
       :showOnFocus="false"
+      type="text" 
+  inputmode="numeric" 
+  pattern="[0-9/]*"
+  maxlength="10"
       showIcon
       @input="handleInput"
       @keydown="handleKeyDown"
@@ -53,60 +57,53 @@ let isFormatting = false;
 const handleKeyDown = (e) => {
   isDeleting = e.key === 'Backspace' || e.key === 'Delete';
 };
-
-// 💡 INPUT FORMATTER: dd/mm/yyyy with auto-slash & mobile-compatible
 const handleInput = (e) => {
   if (isFormatting) return;
   isFormatting = true;
 
   const input = e.target;
   let value = input.value;
-  const prevValue = input._prevValue || '';
   const cursorPos = input.selectionStart;
-  input._prevValue = value;
+  const prevCursorPos = input._prevCursorPos || 0;
+  input._prevCursorPos = cursorPos;
 
-  // Get the change (what was added or removed)
-  let change = '';
-  if (value.length > prevValue.length) {
-    // Character added
-    const addedPos = value.split('').findIndex((c, i) => prevValue[i] !== c);
-    change = value[addedPos];
-  } else if (value.length < prevValue.length) {
-    // Character deleted (handled by isDeleting flag)
-  }
+  // Track if user is trying to type a slash
+  const isTypingSlash = !isDeleting && 
+                        value.length > 0 && 
+                        value[cursorPos - 1] === '/';
 
-  // Process the value
-  let rawValue = value.replace(/\D/g, '');
+  // Process the input
+  let digits = value.replace(/\D/g, '');
   let formatted = '';
   let newCursorPos = cursorPos;
 
-  // Format as user types
-  if (rawValue.length > 0) {
-    const dd = rawValue.slice(0, 2);
-    const mm = rawValue.slice(2, 4);
-    const yyyy = rawValue.slice(4, 8);
+  // Format based on digit count
+  if (digits.length > 0) {
+    const dd = digits.slice(0, 2);
+    const mm = digits.slice(2, 4);
+    const yyyy = digits.slice(4, 8);
 
-    // Build formatted string with slashes
-    if (rawValue.length <= 2) {
+    if (digits.length <= 2) {
       formatted = dd;
-    } else if (rawValue.length <= 4) {
+    } else if (digits.length <= 4) {
       formatted = `${dd}/${mm}`;
     } else {
       formatted = `${dd}/${mm}/${yyyy}`;
     }
 
-    // Adjust cursor position for mobile typing
-    if (change === '/') {
-      // User manually typed a slash - move cursor forward
-      newCursorPos = cursorPos;
-    } else if (!isDeleting && change.match(/\d/)) {
-      // Digit was added - handle auto-slash positioning
-      if (rawValue.length === 2 && prevValue.length <= 2) {
+    // Handle cursor position for manual slash typing
+    if (isTypingSlash) {
+      if (cursorPos === 3) { // After day
+        newCursorPos = 3;
+      } else if (cursorPos === 6) { // After month
+        newCursorPos = 6;
+      }
+    } else if (!isDeleting) {
+      // Auto-advance cursor past slashes
+      if (digits.length === 2 && prevCursorPos <= 2) {
         newCursorPos = 3; // Jump past first slash
-      } else if (rawValue.length === 4 && prevValue.length <= 4) {
+      } else if (digits.length === 4 && prevCursorPos <= 5) {
         newCursorPos = 6; // Jump past second slash
-      } else {
-        newCursorPos = cursorPos + (formatted.length - value.length);
       }
     }
   }
@@ -114,15 +111,20 @@ const handleInput = (e) => {
   // Apply the formatted value
   input.value = formatted;
 
-  // Set the cursor position after formatting
+  // Set cursor position after formatting
   nextTick(() => {
+    // Ensure cursor stays in valid positions (not in the middle of slashes)
+    if (newCursorPos === 2 || newCursorPos === 5) {
+      newCursorPos += 1; // Push past slash positions
+    }
+    
     input.setSelectionRange(newCursorPos, newCursorPos);
     isFormatting = false;
 
     // Validate complete date
     if (formatted.length === 10) {
       const [dd, mm, yyyy] = formatted.split('/');
-      if (dd && mm && yyyy) {
+      if (+dd > 0 && +dd <= 31 && +mm > 0 && +mm <= 12 && yyyy.length === 4) {
         internalDate.value = parseDate(formatted);
       }
     }
