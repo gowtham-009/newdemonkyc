@@ -8,8 +8,14 @@
         <!-- Dropdown Panel -->
         <div v-show="dropdownOpen" class="absolute right-2 mt-1 w-60 bg-white shadow-lg rounded-lg z-10 dark:bg-slate-900">
             <ul class="py-2">
-                <li class="px-4 py-2  cursor-pointer dark:text-gray-500"><span class="text-xl">Welcome</span> <br> <span
-                        class="text-2xl">{{ gust }}</span></li>
+               <li class="px-4 py-2 cursor-pointer dark:text-gray-500">
+    <span class="text-xl">Welcome</span><br>
+    <span v-if="firstname" class="text-md">{{ firstname }}</span><br v-if="firstname">
+    <span v-if="middlename" class="text-md">{{ middlename }}</span><br v-if="middlename">
+    <span v-if="lastname" class="text-md">{{ lastname }}</span>
+</li>
+
+                        
                 <hr>
                 <li class="px-4 flex justify-center py-2 cursor-pointer">
                     <darkmode class="w-full" />
@@ -29,7 +35,9 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-const gust = ref('')
+const firstname = ref('')
+const lastname = ref('')
+const middlename = ref('')
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 
@@ -38,19 +46,19 @@ const router = useRouter()
 
 const gustfun=async()=>{
 const mydata = await getServerData();
-const statuscheck=mydata.payload.metaData.kraPan.APP_KRA_INFO
+const statuscheck=mydata.payload.metaData.pan_info.panNumber
 if(statuscheck){
-    gust.value=mydata.payload.metaData.profile.clientName ||'Gust'
+    firstname.value=mydata.payload.metaData.pan_info.panFirstName 
+    middlename.value=mydata.payload.metaData.pan_info.panMidName
+    lastname.value=mydata.payload.metaData.pan_info.panLastName
+    
 }
-else{
-     gust.value=mydata.payload.metaData.profile.clientName ||'Gust'
-}
+
 }
 function toggleDropdown() {
     dropdownOpen.value = !dropdownOpen.value
 }
 
-// Click outside handler
 function handleClickOutside(event) {
     if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
         dropdownOpen.value = false

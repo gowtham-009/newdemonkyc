@@ -2,7 +2,7 @@
   <div class="primary_color">
     <!-- Top bar -->
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -23,6 +23,8 @@
             <Button @click="openNomineeDialog" class="w-full py-2 primary_color text-white" size="small">
               {{ nomineetext }}
             </Button>
+
+           
           </div>
             <div>
               <!-- Nominee list -->
@@ -47,7 +49,7 @@
                     size="small">Delete</Button>
                 </div>
               </div>
-
+ <span class="text-red-500 text-md">{{ errorpercent }}</span>
         
             </div>
           </div>
@@ -248,7 +250,7 @@ const mobileerror=ref('')
 const emailerror=ref('')
 const sharevalerror=ref('')
 const iderror=ref('')
-
+const errorpercent=ref('')
 const guardianerror = ref('')
 const statementOptions = ref([
   { value: 'Son', name: 'Son' },
@@ -304,6 +306,7 @@ const resetFormFields = () => {
 };
 
 const openNomineeDialog = async() => {
+    errorpercent.value=''
  const mydata = await getServerData();
 
   if (mydata.payload.status == 'error') {
@@ -318,6 +321,8 @@ const openNomineeDialog = async() => {
   resetFormFields();
   visible.value = true;
 };
+
+   let sharepercentage = 0
 const nomineedetails = async () => {
   const mydata = await getServerData();
   const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO ;
@@ -361,7 +366,7 @@ const nomineedetails = async () => {
 
   
       
-      let sharepercentage = 0
+     
       nomineeList.forEach(item => {
         sharepercentage += item.share
       })
@@ -413,7 +418,7 @@ const nomineedetails = async () => {
 
 
 
-      let sharepercentage = 0
+   
       nomineeList.forEach(item => {
         sharepercentage += item.share
       })
@@ -912,7 +917,16 @@ const handleButtonClick = (event) => {
    
     const mydata = await pagestatus('bank1')
     if (mydata.payload.status == 'ok') {
-      emit('updateDiv', 'bank1');
+      console.log("erioj",sharepercentage)
+
+      if(sharepercentage<100){
+        errorpercent.value='Nominee 100 percentage not met'
+       
+      }
+      else{
+        emit('updateDiv', 'bank1');
+      }
+      
     }
     else if (mydata.payload.status == 'error') {
         if (mydata.payload.code == '1002' || mydata.payload.code=='1004'){
