@@ -12,6 +12,7 @@
       showIcon
       @input="handleDateInput"
       @keydown="handleKeyDown"
+      @blur="validateDate"
     />
   </div>
 </template>
@@ -30,12 +31,14 @@ const internalDate = ref(parseDate(props.modelValue));
 function parseDate(dateString) {
   if (!dateString || dateString.length !== 10) return null;
   const [day, month, year] = dateString.split('/');
+  // Return null if any part is invalid
+  if (parseInt(day) > 31 || parseInt(month) > 12) return null;
   return new Date(`${year}-${month}-${day}`);
 }
 
 // Format Date object to dd/mm/yyyy string
 function formatDate(date) {
-  if (!date || isNaN(date)) return '';
+  if (!date || isNaN(date.getTime())) return '';
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
@@ -44,25 +47,37 @@ function formatDate(date) {
 
 // Watch for external modelValue changes
 watch(() => props.modelValue, (newVal) => {
-  internalDate.value = parseDate(newVal);
+  if (newVal !== formatDate(internalDate.value)) {
+    internalDate.value = parseDate(newVal);
+  }
 });
 
 // Emit updates when internalDate changes
 watch(internalDate, (newVal) => {
-  emit('update:modelValue', formatDate(newVal));
+  const formatted = formatDate(newVal);
+  if (formatted !== props.modelValue) {
+    emit('update:modelValue', formatted);
+  }
 });
 
 // Handle keyboard input restrictions
 function handleKeyDown(e) {
-  // Allow: backspace, delete, tab, arrows
-  if ([8, 46, 9, 37, 38, 39, 40].includes(e.keyCode)) return;
+  // Allow navigation and control keys
+  if ([8, 9, 13, 37, 38, 39, 40, 46].includes(e.keyCode) || 
+      (e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode))) {
+    return;
+  }
   
-  // Allow numbers (0-9) and slash (191 or 111 for numpad slash)
-  if ((e.keyCode >= 48 && e.keyCode <= 57) || 
-      (e.keyCode >= 96 && e.keyCode <= 105) || 
-      e.keyCode === 191 || e.keyCode === 111) return;
+  // Allow numbers (0-9) on both main keyboard and numpad
+  const isNumber = (e.keyCode >= 48 && e.keyCode <= 57) || 
+                   (e.keyCode >= 96 && e.keyCode <= 105);
   
-  e.preventDefault();
+  // Allow slash (191 or 111) and dash (for some mobile keyboards)
+  const isSlash = e.keyCode === 191 || e.keyCode === 111 || e.key === '/';
+  
+  if (!isNumber && !isSlash) {
+    e.preventDefault();
+  }
 }
 
 // Handle date input with auto-formatting
@@ -70,6 +85,12 @@ function handleDateInput(e) {
   const input = e.target;
   let value = input.value;
   let cursorPos = input.selectionStart;
+  
+  // Special handling for mobile autocomplete
+  if (value.length === 10 && value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+    internalDate.value = parseDate(value);
+    return;
+  }
   
   // Remove any non-digit characters but preserve existing slashes
   const newValue = value.replace(/[^\d/]/g, '');
@@ -92,6 +113,12 @@ function handleDateInput(e) {
     formattedValue = day;
   }
   
+  // Auto-insert slash after day if needed
+  if ((day.length === 2 && value.length > day.length && value[day.length] !== '/') ||
+      (day.length === 2 && month && !value.includes('/'))) {
+    formattedValue += '/';
+  }
+  
   // Month (01-12)
   if (month || (value.includes('/') && day.length === 2)) {
     if (month) {
@@ -100,11 +127,17 @@ function handleDateInput(e) {
         month = '12';
       }
     }
-    formattedValue += formattedValue ? `/${month}` : month;
+    formattedValue += formattedValue.endsWith('/') ? month : `/${month}`;
+  }
+  
+  // Auto-insert slash after month if needed
+  if (month && month.length === 2 && value.length > day.length + month.length + 1 && 
+      value[day.length + month.length + 1] !== '/') {
+    formattedValue += '/';
   }
   
   // Year (1900-2099)
-  if (year || (value.split('/').length > 2 && month.length === 2)) {
+  if (year || (value.split('/').length > 2 && month && month.length === 2)) {
     if (year) {
       year = year.slice(0, 4);
       if (year.length === 4) {
@@ -113,7 +146,7 @@ function handleDateInput(e) {
         if (yearNum > 2099) year = '2099';
       }
     }
-    formattedValue += formattedValue ? `/${year}` : year;
+    formattedValue += formattedValue.endsWith('/') ? year : `/${year}`;
   }
   
   // Update input value
@@ -121,24 +154,46 @@ function handleDateInput(e) {
   
   // Adjust cursor position
   nextTick(() => {
-    // Move cursor forward if we auto-inserted a slash
-    if (cursorPos === 2 && formattedValue.length === 3 && formattedValue[2] === '/') {
-      input.setSelectionRange(3, 3);
-    } 
-    else if (cursorPos === 5 && formattedValue.length === 6 && formattedValue[5] === '/') {
-      input.setSelectionRange(6, 6);
-    }
-    else {
-      // Maintain cursor position relative to content
-      const diff = formattedValue.length - value.length;
-      input.setSelectionRange(cursorPos + diff, cursorPos + diff);
-    }
-    
-    // Update model if we have a complete date
+    // Special handling for mobile autocomplete
     if (formattedValue.length === 10) {
       internalDate.value = parseDate(formattedValue);
+      return;
     }
+    
+    // Calculate new cursor position
+    let newCursorPos = cursorPos;
+    
+    // If we added a slash automatically
+    if (formattedValue.length > value.length) {
+      if (cursorPos === 2 && formattedValue[2] === '/') {
+        newCursorPos = 3;
+      } 
+      else if (cursorPos === 5 && formattedValue[5] === '/') {
+        newCursorPos = 6;
+      }
+    }
+    
+    // Ensure cursor stays within bounds
+    newCursorPos = Math.min(newCursorPos, formattedValue.length);
+    input.setSelectionRange(newCursorPos, newCursorPos);
   });
+}
+
+// Final validation on blur
+function validateDate(e) {
+  const input = e.target;
+  const value = input.value;
+  
+  if (value.length === 10) {
+    const [day, month, year] = value.split('/');
+    if (parseInt(day) > 31 || parseInt(month) > 12 || parseInt(year) < 1900 || parseInt(year) > 2099) {
+      input.value = '';
+      internalDate.value = null;
+    }
+  } else if (value.length > 0) {
+    input.value = '';
+    internalDate.value = null;
+  }
 }
 </script>
 
@@ -160,5 +215,14 @@ function handleDateInput(e) {
   box-sizing: border-box;
   background-color: white;
   width: 100%;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .custom-input {
+    font-size: 1.2rem;
+    height: 50px;
+    padding: 10px 14px;
+  }
 }
 </style>
