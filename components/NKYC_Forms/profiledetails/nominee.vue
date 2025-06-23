@@ -322,7 +322,7 @@ const openNomineeDialog = async() => {
   visible.value = true;
 };
 
-   let sharepercentage = 0
+  
 const nomineedetails = async () => {
   const mydata = await getServerData();
   const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO ;
@@ -365,7 +365,7 @@ const nomineedetails = async () => {
       sharevalue.value = nominee[`nominee${nomineeid}Share`] || 0;
 
   
-      
+       let sharepercentage = 0
      
       nomineeList.forEach(item => {
         sharepercentage += item.share
@@ -416,7 +416,7 @@ const nomineedetails = async () => {
         }
       }
 
-
+ let sharepercentage = 0
 
    
       nomineeList.forEach(item => {
