@@ -219,6 +219,7 @@ const kraaddresssubmission = async (resend) => {
 
     if (resend == 'resend') {
        loginerror.value=false
+       loginotpval.value=''
       resend_sh.value = true
       timeLeft.value = 60;
 
