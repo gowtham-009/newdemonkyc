@@ -24,16 +24,10 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const parseDate = (str) => {
-  // Allow both formats: with slashes (09/05/2000) and without (09052000)
-  const withSlashes = /^\d{2}\/\d{2}\/\d{4}$/.test(str)
-  const withoutSlashes = /^\d{8}$/.test(str)
+  // Accept both formats: with slashes (09/05/2000) and without (09052000)
+  const dateStr = str.includes('/') ? str : `${str.slice(0,2)}/${str.slice(2,4)}/${str.slice(4)}`
   
-  if (!withSlashes && !withoutSlashes) return null
-  
-  let dateStr = str
-  if (withoutSlashes) {
-    dateStr = `${str.slice(0,2)}/${str.slice(2,4)}/${str.slice(4)}`
-  }
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return null
   
   const [dd, mm, yyyy] = dateStr.split('/')
   const date = new Date(`${yyyy}-${mm}-${dd}`)
@@ -69,12 +63,9 @@ const handleInput = (e) => {
     e.target.value = value
   }
   
-  // Update the model if valid (accept both formats)
-  if (value.length === 10 && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-    const parsed = parseDate(value)
-    if (parsed) internalDate.value = parsed
-  }
-  else if (value.length === 8 && /^\d{8}$/.test(value)) {
+  // Update model if valid (8 digits or 10 characters with slashes)
+  if ((value.length === 8 && /^\d+$/.test(value)) || 
+      (value.length === 10 && /^\d{2}\/\d{2}\/\d{4}$/.test(value))) {
     const parsed = parseDate(value)
     if (parsed) internalDate.value = parsed
   }
@@ -84,28 +75,21 @@ onMounted(() => {
   nextTick(() => {
     const input = document.querySelector('.custom-input')
     if (input) {
-      input.setAttribute('maxlength', '10') // Allows DD/MM/YYYY (10 chars)
-      input.setAttribute('inputmode', 'tel') // Shows numeric keyboard with slash on mobile
+      // Key settings for mobile keyboard with slash
+      input.setAttribute('maxlength', '10')
+      input.setAttribute('inputmode', 'tel') // Shows numeric keyboard with slash
       input.setAttribute('pattern', '[0-9/]*')
       input.setAttribute('placeholder', 'DD/MM/YYYY')
       
+      // Keyboard control
       input.addEventListener('keydown', (e) => {
-        // Allow: numbers (0-9), slash (/), backspace, delete, tab, arrows
-        const allowedKeys = [
-          '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-          '/', 'Backspace', 'Delete', 'Tab',
-          'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'
-        ]
-        
-        // Allow Ctrl combinations (A, C, V, X)
-        if (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
+        // Allow: numbers, slash, navigation keys, and basic editing keys
+        if (/[0-9/]/.test(e.key) || 
+            ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key) ||
+            (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))) {
           return
         }
-        
-        // Block any other key
-        if (!allowedKeys.includes(e.key)) {
-          e.preventDefault()
-        }
+        e.preventDefault()
       })
     }
   })
