@@ -29,11 +29,23 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-const gust = ref('Guest')
+const gust = ref('')
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 
+
 const router = useRouter()
+
+const gustfun=async()=>{
+const mydata = await getServerData();
+const statuscheck=mydata.payload.metaData.kraPan.APP_KRA_INFO
+if(statuscheck){
+    gust.value=mydata.payload.metaData.profile.clientName ||'Gust'
+}
+else{
+     gust.value=mydata.payload.metaData.profile.clientName ||'Gust'
+}
+}
 function toggleDropdown() {
     dropdownOpen.value = !dropdownOpen.value
 }
@@ -45,7 +57,8 @@ function handleClickOutside(event) {
     }
 }
 
-onMounted(() => {
+onMounted(async() => {
+    await gustfun()
     document.addEventListener('click', handleClickOutside)
 })
 
