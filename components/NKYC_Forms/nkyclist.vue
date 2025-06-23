@@ -3,7 +3,7 @@
         <div class="w-full px-3 primary_color flex justify-between items-center"
             :style="{ height: deviceHeight * 0.08 + 'px' }">
 
-            <logo style="width: 40px; height: 40px;" />
+            <logo  />
             <profile />
 
         </div>
