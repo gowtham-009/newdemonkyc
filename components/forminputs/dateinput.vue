@@ -4,96 +4,106 @@
     <Calendar
       v-model="internalDate"
       dateFormat="dd/mm/yy"
-      placeholder="DD/MM/YYYY"
+      placeholder="DD / MM / YYYY"
       class="custom-calendar w-full dark:!bg-gray-800 rounded-lg"
       inputClass="custom-input"
       :manualInput="true"
       :showOnFocus="false"
       showIcon
       @input="handleInput"
+      @keydown="handleKeyDown"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue';
 
 const props = defineProps({
-  modelValue: String
-})
-const emit = defineEmits(['update:modelValue'])
+  modelValue: String, // format: dd/mm/yyyy
+});
+const emit = defineEmits(['update:modelValue']);
 
+// Parse and format utilities
 const parseDate = (str) => {
-  // Accept both formats: with slashes (09/05/2000) and without (09052000)
-  const dateStr = str.includes('/') ? str : `${str.slice(0,2)}/${str.slice(2,4)}/${str.slice(4)}`
-  
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return null
-  
-  const [dd, mm, yyyy] = dateStr.split('/')
-  const date = new Date(`${yyyy}-${mm}-${dd}`)
-  return isNaN(date.getTime()) ? null : date
-}
+  if (!str || str.length !== 10) return null;
+  const [dd, mm, yyyy] = str.split('/');
+  return new Date(`${yyyy}-${mm}-${dd}`);
+};
+const formatDate = (dateObj) => {
+  if (!(dateObj instanceof Date) || isNaN(dateObj)) return '';
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const year = dateObj.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
-const formatDate = (date) => {
-  if (!(date instanceof Date) || isNaN(date.getTime())) return ''
-  const dd = String(date.getDate()).padStart(2, '0')
-  const mm = String(date.getMonth() + 1).padStart(2, '0')
-  const yyyy = date.getFullYear()
-  return `${dd}/${mm}/${yyyy}`
-}
-
-const internalDate = ref(parseDate(props.modelValue))
-
+const internalDate = ref(parseDate(props.modelValue));
 watch(() => props.modelValue, (val) => {
-  internalDate.value = parseDate(val)
-})
-
+  internalDate.value = parseDate(val);
+});
 watch(internalDate, (val) => {
-  emit('update:modelValue', formatDate(val))
-})
+  emit('update:modelValue', formatDate(val));
+});
+
+let isFormatting = false;
+
+const handleKeyDown = (e) => {
+  // do nothing specific here for now
+};
 
 const handleInput = (e) => {
-  let value = e.target.value
-  
-  // Remove any non-digit or non-slash characters
-  value = value.replace(/[^0-9/]/g, '')
-  
-  // Update the input value if changed
-  if (value !== e.target.value) {
-    e.target.value = value
+  if (isFormatting) return;
+  isFormatting = true;
+
+  const input = e.target;
+  let raw = input.value;
+
+  // Allow user to enter slashes manually and ignore extra characters
+  raw = raw.replace(/[^0-9/]/g, '');
+
+  // Remove all slashes for reformatting
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  let formatted = '';
+
+  if (digits.length <= 2) {
+    formatted = digits;
+  } else if (digits.length <= 4) {
+    formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  } else {
+    formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
   }
-  
-  // Update model if valid (8 digits or 10 characters with slashes)
-  if ((value.length === 8 && /^\d+$/.test(value)) || 
-      (value.length === 10 && /^\d{2}\/\d{2}\/\d{4}$/.test(value))) {
-    const parsed = parseDate(value)
-    if (parsed) internalDate.value = parsed
+
+  // If user manually added slashes in right place, preserve them
+  if (raw.length >= formatted.length) {
+    formatted = raw;
   }
-}
+
+  input.value = formatted;
+
+  nextTick(() => {
+    const pos = input.value.length;
+    input.setSelectionRange(pos, pos);
+    isFormatting = false;
+  });
+
+  // Final validation
+  if (formatted.length === 10) {
+    internalDate.value = parseDate(formatted);
+  }
+};
 
 onMounted(() => {
   nextTick(() => {
-    const input = document.querySelector('.custom-input')
+    const input = document.querySelector('.custom-input');
     if (input) {
-      // Key settings for mobile keyboard with slash
-      input.setAttribute('maxlength', '10')
-      input.setAttribute('inputmode', 'tel') // Shows numeric keyboard with slash
-      input.setAttribute('pattern', '[0-9/]*')
-      input.setAttribute('placeholder', 'DD/MM/YYYY')
-      
-      // Keyboard control
-      input.addEventListener('keydown', (e) => {
-        // Allow: numbers, slash, navigation keys, and basic editing keys
-        if (/[0-9/]/.test(e.key) || 
-            ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key) ||
-            (e.ctrlKey && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))) {
-          return
-        }
-        e.preventDefault()
-      })
+      input.setAttribute('maxlength', '10');
+      input.setAttribute('inputmode', 'text'); // ✅ allows slash
+      input.setAttribute('pattern', '[0-9/]*'); // ✅ digits and slash
+      input.setAttribute('autocomplete', 'off');
     }
-  })
-})
+  });
+});
 </script>
 
 <style scoped>
@@ -105,13 +115,13 @@ onMounted(() => {
 .custom-input {
   font-size: 1.4rem;
   font-weight: bold;
-  text-align: center;
   letter-spacing: 0.15em;
+  text-align: center;
   padding: 12px 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
   height: 60px;
-  background-color: white;
   box-sizing: border-box;
+  background-color: white;
 }
 </style>
