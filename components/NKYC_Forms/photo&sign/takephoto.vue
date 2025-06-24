@@ -136,7 +136,7 @@ const cameraComponent = ref(null);
 // Device & UI State
 const deviceHeight = ref(window.innerHeight);
 
-const buttonText = ref("Continue");
+const buttonText = ref("Next");
 const isBack = ref(true);
 
 const ipverror=ref(false)
