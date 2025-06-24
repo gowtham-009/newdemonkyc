@@ -86,6 +86,7 @@ const options = [
 ];
 
 const selectMaritalStatus = (value) => {
+  qulificationerror.value=''
   selected.value = value;
 
 };

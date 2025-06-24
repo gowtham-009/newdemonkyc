@@ -75,6 +75,7 @@ const options = [
 ];
 
 const selectMaritalStatus = (value) => {
+   incomeerror.value=''
   selected.value = value;
 };
 

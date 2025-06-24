@@ -126,6 +126,7 @@ const selectoptions = [
 ];
 
 const selectGenderStatus = (value) => {
+   gendererror.value=''
   selectedgender.value = value;
 };
 // Marital Status
@@ -136,6 +137,7 @@ const options = [
 ];
 
 const selectMaritalStatus = (value) => {
+  maritalerror.value=''
   selected.value = value;
 };
 
@@ -146,6 +148,7 @@ const clientoptions = [
 ];
 
 const clientstatus = (value) => {
+  peperror.value=''
   clientselected.value = value;
 };
 

@@ -81,6 +81,7 @@ const options = [
 ];
 
 const selectMaritalStatus = (value) => {
+   tradingerror.value=''
   selected.value = value;
 };
 

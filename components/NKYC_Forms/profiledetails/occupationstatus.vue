@@ -80,6 +80,7 @@ const options = [
 ];
 
 const selectMaritalStatus = (value) => {
+  occupationerror.value=''
   selected.value = value;
 
 
