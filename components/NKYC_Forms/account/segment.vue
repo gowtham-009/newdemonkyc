@@ -91,6 +91,7 @@ const options = [
 ];
 
 const toggleSelection = (value) => {
+  segmenterror.value=''
   const index = selected.value.indexOf(value);
   if (index > -1) {
     selected.value.splice(index, 1);
