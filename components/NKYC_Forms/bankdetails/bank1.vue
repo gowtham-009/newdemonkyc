@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo />
       <profile />
     </div>
     <div class="flex justify-between  p-2 flex-col bg-white rounded-t-3xl dark:bg-black"
@@ -64,7 +64,7 @@
 
           <div>
 <span class="text-gray-500  text-sm">BanK Address</span>
-            <Address v-model="address"  />
+            <Address v-model="address" />
                   <span class="text-red-500">{{ addresserror }}</span>
 
           </div>
@@ -163,25 +163,25 @@ const addresserror=ref('')
 
 const profilesetinfo = async () => {
   const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
+  const statuscheck = mydata?.payload?.metaData?.bank ;
 
   if (statuscheck) {
 
-    selected.value = mydata?.payload?.metaData?.bank?.bank1AccType || ''
-    accno.value = mydata?.payload?.metaData?.bank?.bank1AccNo || ''
-    ifsc.value = mydata?.payload?.metaData?.bank?.bank1IFSC || ''
-    micr.value = mydata?.payload?.metaData?.bank?.bank1MICR || ''
-    address.value = mydata?.payload?.metaData?.bank?.bank1Address || ''
-    bankname.value = mydata?.payload?.metaData?.bank?.bank1Name || ''
+    selected.value = mydata?.payload?.metaData?.bank?.bank1AccType 
+    accno.value = mydata?.payload?.metaData?.bank?.bank1AccNo 
+    ifsc.value = mydata?.payload?.metaData?.bank?.bank1IFSC 
+    micr.value = mydata?.payload?.metaData?.bank?.bank1MICR 
+    address.value = mydata?.payload?.metaData?.bank?.bank1Address 
+    bankname.value = mydata?.payload?.metaData?.bank?.bank1Name 
 
   }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    selected.value = mydata?.payload?.metaData?.bank?.bank1AccType || ''
-    accno.value = mydata?.payload?.metaData?.bank?.bank1AccNo || ''
-    ifsc.value = mydata?.payload?.metaData?.bank?.bank1IFSC || ''
-    micr.value = mydata?.payload?.metaData?.bank?.bank1MICR || ''
-    address.value = mydata?.payload?.metaData?.bank?.bank1Address || ''
-    bankname.value = mydata?.payload?.metaData?.bank?.bank1Name || ''
+  else {
+    selected.value = ''
+    accno.value = ''
+    ifsc.value = ''
+    micr.value =''
+    address.value = ''
+    bankname.value = ''
   }
 };
 await profilesetinfo()
