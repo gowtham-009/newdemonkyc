@@ -126,8 +126,8 @@ const getsegmentdata = async () => {
   const segments = mydata?.payload?.metaData?.proofs?.pancard ;
 
   if (
-    mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO ||
-    (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument)
+   
+    mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument
   ) {
 
     

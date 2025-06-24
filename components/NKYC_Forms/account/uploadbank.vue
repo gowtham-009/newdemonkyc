@@ -116,7 +116,7 @@ const getsegmentdata = async () => {
   const mydata = await getServerData();
   const imageauth = headertoken;
   const userToken = localStorage.getItem('userkey');
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
+
   const segments = mydata?.payload?.metaData?.proofs?.bank || '';
 
   if (segments) {
