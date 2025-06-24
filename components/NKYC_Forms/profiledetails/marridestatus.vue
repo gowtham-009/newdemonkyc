@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -153,29 +153,38 @@ const clientstatus = (value) => {
 
 const profilesetinfo = async () => {
   const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
-
+  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO ;
+  const personal=mydata.payload.metaData.personal
+  if(personal.length===0){
   if (statuscheck) {
-    const gender = mydata?.payload?.metaData?.kraPan?.APP_GEN || '';
+    const gender = mydata?.payload?.metaData?.kraPan?.APP_GEN ;
     selectedgender.value = gender === 'M' ? 'Male' : gender === 'F' ? 'Female' : 'Other';
 
-    const marriedstatus = mydata?.payload?.metaData?.kraPan?.APP_MAR_STATUS || '';
+    const marriedstatus = mydata?.payload?.metaData?.kraPan?.APP_MAR_STATUS ;
     selected.value = marriedstatus === '01' ? 'married' : marriedstatus === '02' ? 'unmarried' : 'other';
 
     clientselected.value = mydata?.payload?.metaData?.personal?.pep || 'No, I am Not'
   }
   else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    const gender = mydata?.payload?.metaData?.digi_info?.gender || ''
+    const gender = mydata?.payload?.metaData?.digi_info?.gender 
     selectedgender.value = gender === 'MALE' ? 'Male' : gender === 'FEMALE' ? 'Female' : 'Other';
 
-    const marriedstatus = mydata?.payload?.metaData?.personal?.maritalStatus || '';
+    const marriedstatus = mydata?.payload?.metaData?.personal?.maritalStatus ;
     selected.value = marriedstatus
 
     clientselected.value = mydata?.payload?.metaData?.personal?.pep || 'No, I am Not'
   }
-  else {
-
   }
+  else if(mydata.payload.metaData.personal.maritalStatus){
+    const genderp = mydata.payload.metaData.personal.gender ;
+    selectedgender.value = genderp ;
+    const marriedstatus = mydata.payload.metaData.personal.maritalStatus;
+    selected.value = marriedstatus ;
+    clientselected.value = mydata?.payload?.metaData?.personal?.pep || 'No, I am Not'
+  }
+
+
+ 
 };
 
 

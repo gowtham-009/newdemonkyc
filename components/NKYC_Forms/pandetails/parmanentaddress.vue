@@ -2,7 +2,7 @@
   <div class="primary_color">
     <!-- Header -->
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -119,9 +119,12 @@ onBeforeUnmount(() => {
 const setPermanentAddress = async () => {
   const mydata = await getServerData();
   const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO
-  if (statuscheck) {
+
+  const addressper=mydata.payload.metaData.address
+  if(addressper.length==0){
+    if (statuscheck) {
     const add1 = mydata?.payload?.metaData?.kraPan?.APP_PER_ADD1 || ''
-    const add2 = mydata?.payload?.metaData?.kraPan?.APP_PER_ADD2 || ''
+    const add2 = mydata.payload.metaData.address.perPincode
     const add3 = mydata?.payload?.metaData?.kraPan?.APP_PER_ADD3 || ''
     address.value = add1 + " " + add2 + " " + add3
     const stateCode = String(mydata?.payload?.metaData?.kraPan?.APP_PER_STATE || '');
@@ -136,9 +139,19 @@ const setPermanentAddress = async () => {
     city.value = mydata?.payload?.metaData?.address.perCity || ''
     pincode.value = mydata?.payload?.metaData?.address.perPincode || ''
   }
-  else {
-
   }
+
+  else if(mydata.payload.metaData.address.perPincode){
+    const add1 = mydata.payload.metaData.address.perAddress
+    const add2 = mydata.payload.metaData.address.perAddressLine2
+    const add3 = mydata.payload.metaData.address.perAddressLine3
+    address.value = add1 + " " + add2 + " " + add3
+  
+    state.value = mydata.payload.metaData.address.perState
+    city.value = mydata.payload.metaData.address.perCity
+    pincode.value = mydata.payload.metaData.address.perPincode
+  }
+  
 
 }
 

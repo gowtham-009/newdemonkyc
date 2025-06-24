@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
     <div class="flex justify-between p-2 flex-col bg-white rounded-t-3xl dark:bg-black"
@@ -81,9 +81,9 @@ const isBack = ref(true);
 const profilesetinfo = async () => {
   const mydata = await getServerData();
   const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
-
-  if (statuscheck) {
-
+const personal=mydata.payload.metaData.personal
+if(personal.length===0){
+   if (statuscheck) {
     father.value = mydata?.payload?.metaData?.kraPan?.APP_F_NAME || ''
     mother.value = mydata?.payload?.metaData?.kraPan?.APP_M_NAME || mydata?.payload?.metaData?.personal?.motherName || ''
 
@@ -92,9 +92,14 @@ const profilesetinfo = async () => {
     father.value = mydata?.payload?.metaData?.personal?.fatherName || ''
     mother.value = mydata?.payload?.metaData?.personal?.motherName || ''
   }
-  else {
+}
 
-  }
+else if(mydata.payload.metaData.personal.fatherName && mydata.payload.metaData.personal.motherName){
+    father.value = mydata.payload.metaData.personal.fatherName || ''
+    mother.value = mydata.payload.metaData.personal.motherName || ''
+}
+ 
+  
 };
 
 
