@@ -31,7 +31,7 @@
               class="p-2 px-2 flex justify-center items-center w-10 h-10 bg-blue-200 dark:bg-slate-900 rounded-full flex-shrink-0">
               <i class="pi pi-building-columns text-blue-900 text-xl "></i>
             </div>
-            <p class="text-medium text-sm text-gray-500">{{ bankname }}</p>
+            <p class="text-medium text-md text-gray-500">{{ bankname }}</p>
           </div>
 
           <div class="w-full flex mt-2 p-1">
