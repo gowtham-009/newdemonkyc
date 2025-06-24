@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
     <div class="flex justify-between  p-2 flex-col bg-white rounded-t-3xl dark:bg-black"
@@ -196,11 +196,9 @@ const {htoken}=headerToken()
 
 const getsegmentdata = async () => {
   const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
+  const statuscheck = mydata?.payload?.metaData?.proofs?.signature;
   if (statuscheck) {
     const segments = mydata?.payload?.metaData?.proofs?.signature ;
-    if (segments) {
-   
        isSignatureUploaded.value = true;
        const headertoken=htoken
       const imageauth = headertoken;
@@ -227,41 +225,11 @@ const getsegmentdata = async () => {
           initialSignatureLoaded.value = true;
       };
       img.src = imgSrc;
-    }
+    
 
   }
 
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
- 
-    const headertoken=htoken
-    const segments = mydata?.payload?.metaData?.proofs?.signature || '';
-    if (segments) {
-      const imageauth = headertoken;
-      const userToken = localStorage.getItem('userkey');
-      const imgSrc = `${baseurl.value}/view/uploads/${imageauth}/${userToken}/${segments}`;
-      imageSrc.value = imgSrc;
 
-
-      const img = new Image();
-      img.crossOrigin = "Anonymous"; // Required for canvas toDataURL from remote source
-      img.onload = () => {
-        const canvas = canvasRef.value;
-        if (!canvas || !ctx) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-        const x = (canvas.width - img.width * scale) / 2;
-        const y = (canvas.height - img.height * scale) / 2;
-
-        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-        isImageUploaded.value = true;
-         hasSignature.value = true;
-           initialSignatureLoaded.value = true;
-      };
-      img.src = imgSrc;
-    }
-  }
 };
 
 
