@@ -139,30 +139,7 @@ const profilesetinfo = async () => {
     }
   }
 
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    const holdername = mydata?.payload?.metaData?.bank?.bank1HolderName || '';
-    if (holdername) {
-      successtext.value = 'Bank account added'
-      verifiedtext.value = 'Your bank details have been verified.'
-
-
-      bankname.value = mydata?.payload?.metaData?.bank?.bank1Name || ''
-      accno.value = mydata?.payload?.metaData?.bank?.bank1AccNo || ''
-      ifsccode.value = mydata?.payload?.metaData?.bank?.bank1IFSC || ''
-      MICR.value = mydata?.payload?.metaData?.bank?.bank1MICR || ''
-      address.value = mydata?.payload?.metaData?.bank?.bank1Address || ''
-    }
-    else {
-      successtext.value = 'Bank account failed'
-      verifiedtext.value = ''
-      bankerror.value = true
-      bankname.value = mydata?.payload?.metaData?.bank?.bank1Name || ''
-      accno.value = mydata?.payload?.metaData?.bank?.bank1AccNo || ''
-      ifsccode.value = mydata?.payload?.metaData?.bank?.bank1IFSC || ''
-      MICR.value = mydata?.payload?.metaData?.bank?.bank1MICR || ''
-      address.value = mydata?.payload?.metaData?.bank?.bank1Address || ''
-    }
-  }
+ 
 
 };
 await profilesetinfo()
