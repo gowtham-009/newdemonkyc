@@ -6,7 +6,7 @@
     </div>
     <div class="flex justify-between  p-2 flex-col bg-white rounded-t-3xl dark:bg-black"
       :style="{ height: deviceHeight * 0.92 + 'px' }">
-      <div class="w-full mt-1 px-2 p-1">
+      <div class="w-full px-2 p-1">
         <p class="text-xl text-blue-900 font-medium dark:text-gray-400">
           Link your bank account
         </p>
@@ -63,8 +63,8 @@
           </div>
 
           <div>
-            <p class="text-gray-500  text-sm font-normal leading-4">Bank Address</p>
-            <Address v-model="address" class="mt-1" />
+<span class="text-gray-500  text-sm">BanK Address</span>
+            <Address v-model="address"  />
                   <span class="text-red-500">{{ addresserror }}</span>
 
           </div>
