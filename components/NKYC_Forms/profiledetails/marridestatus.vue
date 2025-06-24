@@ -152,39 +152,50 @@ const clientstatus = (value) => {
 
 
 const profilesetinfo = async () => {
-  const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO ;
-  const personal=mydata.payload.metaData.personal
-  if(personal.length===0){
-  if (statuscheck) {
-    const gender = mydata?.payload?.metaData?.kraPan?.APP_GEN ;
-    selectedgender.value = gender === 'M' ? 'Male' : gender === 'F' ? 'Female' : 'Other';
+  try {
+    const mydata = await getServerData();
+    
+    // Safely access nested properties with optional chaining
+    const kraPanData = mydata?.payload?.metaData?.kraPan;
+    const personalData = mydata?.payload?.metaData?.personal || {};
+    const digiInfo = mydata?.payload?.metaData?.digi_info;
+    const digiDocs = mydata?.payload?.metaData?.digi_docs;
 
-    const marriedstatus = mydata?.payload?.metaData?.kraPan?.APP_MAR_STATUS ;
-    selected.value = marriedstatus === '01' ? 'married' : marriedstatus === '02' ? 'unmarried' : 'other';
+    // Check if personal data is empty or missing gender
+    if ((!personalData || Object.keys(personalData).length === 0 || !personalData.gender)) {
+      if (kraPanData?.APP_KRA_INFO) {
+        // Use KRA data
+        const gender = kraPanData?.APP_GEN;
+        selectedgender.value = gender === 'M' ? 'Male' : gender === 'F' ? 'Female' : 'Other';
 
-    clientselected.value = mydata?.payload?.metaData?.personal?.pep || 'No, I am Not'
+        const marriedstatus = kraPanData?.APP_MAR_STATUS;
+        selected.value = marriedstatus === '01' ? 'married' : marriedstatus === '02' ? 'unmarried' : 'other';
+      } 
+      else if (digiInfo?.aadhaarUID && digiDocs?.aadhaarDocument) {
+        // Use digi info data
+        const gender = digiInfo?.gender;
+        selectedgender.value = gender === 'MALE' ? 'Male' : gender === 'FEMALE' ? 'Female' : 'Other';
+
+        const marriedstatus = personalData?.maritalStatus;
+        selected.value = marriedstatus || 'other'; // Provide default if undefined
+      }
+    } 
+    else if (personalData.maritalStatus || personalData.gender) {
+      // Use personal data if available
+      selectedgender.value = personalData.gender || 'Other';
+      selected.value = personalData.maritalStatus || 'other';
+    }
+
+    // Set PEP status with fallback
+    clientselected.value = personalData?.pep || 'No, I am Not';
+    
+  } catch (error) {
+    console.error('Error processing profile info:', error);
+    // Set default values in case of error
+    selectedgender.value = 'Other';
+    selected.value = 'other';
+    clientselected.value = 'No, I am Not';
   }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    const gender = mydata?.payload?.metaData?.digi_info?.gender 
-    selectedgender.value = gender === 'MALE' ? 'Male' : gender === 'FEMALE' ? 'Female' : 'Other';
-
-    const marriedstatus = mydata?.payload?.metaData?.personal?.maritalStatus ;
-    selected.value = marriedstatus
-
-    clientselected.value = mydata?.payload?.metaData?.personal?.pep || 'No, I am Not'
-  }
-  }
-  else if(mydata.payload.metaData.personal.maritalStatus){
-    const genderp = mydata.payload.metaData.personal.gender ;
-    selectedgender.value = genderp ;
-    const marriedstatus = mydata.payload.metaData.personal.maritalStatus;
-    selected.value = marriedstatus ;
-    clientselected.value = mydata?.payload?.metaData?.personal?.pep || 'No, I am Not'
-  }
-
-
- 
 };
 
 

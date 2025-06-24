@@ -79,29 +79,49 @@ const mothererror=ref('')
 const isStatusValid = ref(true);
 const isBack = ref(true);
 const profilesetinfo = async () => {
-  const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
-const personal=mydata.payload.metaData.personal
-if(personal.length===0){
-   if (statuscheck) {
-    father.value = mydata?.payload?.metaData?.kraPan?.APP_F_NAME || ''
-    mother.value = mydata?.payload?.metaData?.kraPan?.APP_M_NAME || mydata?.payload?.metaData?.personal?.motherName || ''
+  try {
+    const mydata = await getServerData();
+    
+    // Safely access nested properties with optional chaining
+    const kraPan = mydata?.payload?.metaData?.kraPan || {};
+    const personal = mydata?.payload?.metaData?.personal || {};
+    const digiInfo = mydata?.payload?.metaData?.digi_info || {};
+    const digiDocs = mydata?.payload?.metaData?.digi_docs || {};
 
+    // Check if personal data is empty or missing
+    if (!personal || Object.keys(personal).length === 0) {
+      if (kraPan.APP_KRA_INFO) {
+        // Use KRA data as primary source
+        father.value = kraPan.APP_F_NAME || '';
+        mother.value = kraPan.APP_M_NAME || personal.motherName || '';
+      } 
+      else if (digiInfo.aadhaarUID && digiDocs.aadhaarDocument) {
+        // Fall back to digi info if available
+        father.value = personal.fatherName || '';
+        mother.value = personal.motherName || '';
+      }
+    } 
+    else {
+      // Use personal data if available (checking both father and mother names)
+      father.value = personal.fatherName || '';
+      mother.value = personal.motherName || '';
+      
+      // If either name is missing, try to fall back to other sources
+      if (!father.value && kraPan.APP_KRA_INFO) {
+        father.value = kraPan.APP_F_NAME || '';
+      }
+      if (!mother.value) {
+        mother.value = kraPan.APP_M_NAME || personal.motherName || '';
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error processing profile info:', error);
+    // Set default empty values in case of error
+    father.value = '';
+    mother.value = '';
   }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    father.value = mydata?.payload?.metaData?.personal?.fatherName || ''
-    mother.value = mydata?.payload?.metaData?.personal?.motherName || ''
-  }
-}
-
-else if(mydata.payload.metaData.personal.fatherName && mydata.payload.metaData.personal.motherName){
-    father.value = mydata.payload.metaData.personal.fatherName || ''
-    mother.value = mydata.payload.metaData.personal.motherName || ''
-}
- 
-  
 };
-
 
 await profilesetinfo()
 

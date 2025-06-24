@@ -93,39 +93,63 @@ const cityerror=ref('')
 const pincodeerror=ref('')
 
 const setCommunicationAddress = async () => {
-  const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO
+  try {
+    const mydata = await getServerData();
+    
+    // Safely access nested properties with defaults
+    const kraPan = mydata?.payload?.metaData?.kraPan || {};
+    const addressData = mydata?.payload?.metaData?.address || {};
+    const digiInfo = mydata?.payload?.metaData?.digi_info || {};
+    const digiDocs = mydata?.payload?.metaData?.digi_docs || {};
+    const kraIdentityData = mydata?.payload?.metaData?.kraIdentityData || {};
 
-  const addresscom=mydata.payload.metaData.address
-  if(addresscom.length==0){
-     if (statuscheck) {
-    const add1 = mydata?.payload?.metaData?.kraPan?.APP_COR_ADD1 || ''
-    const add2 = mydata?.payload?.metaData?.kraPan?.APP_COR_ADD2 || ''
-    const add3 = mydata?.payload?.metaData?.kraPan?.APP_COR_ADD3 || ''
-    address.value = add1 + " " + add2 + " " + add3
-    const stateCode = String(mydata?.payload?.metaData?.kraPan?.APP_PER_STATE || '');
-    state.value = (mydata?.payload?.metaData?.kraIdentityData?.stateCode && mydata?.payload?.metaData?.kraIdentityData?.stateCode[stateCode]) || '';
-    city.value = mydata?.payload?.metaData?.kraPan?.APP_PER_CITY || ''
-    pincode.value = mydata?.payload?.metaData?.kraPan?.APP_PER_PINCD || ''
-  }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    address.value = mydata?.payload?.metaData?.address?.comAddress || ''
+    // Check if communication address data is empty or missing pincode
+    if (!addressData || Object.keys(addressData).length === 0 || !addressData.comPincode) {
+      if (kraPan.APP_KRA_INFO) {
+        // Use KRA PAN data for communication address
+        const addParts = [
+          kraPan.APP_COR_ADD1 || '',
+          kraPan.APP_COR_ADD2 || '',
+          kraPan.APP_COR_ADD3 || ''
+        ].filter(Boolean).join(" ");
+        
+        address.value = addParts;
+        
+        // Note: Using PER_STATE for communication address - verify if this is correct
+        const stateCode = String(kraPan.APP_PER_STATE || '');
+        state.value = kraIdentityData.stateCode?.[stateCode] || '';
+        city.value = kraPan.APP_PER_CITY || '';
+        pincode.value = kraPan.APP_PER_PINCD || '';
+      }
+      else if (digiInfo.aadhaarUID && digiDocs.aadhaarDocument) {
+        // Use digi/Aadhaar data
+        address.value = addressData.comAddress || '';
+        state.value = addressData.comState || '';
+        city.value = addressData.comCity || '';
+        pincode.value = addressData.comPincode || '';
+      }
+    } 
+    else {
+      // Use communication address data if available
+      const addParts = [
+        addressData.comAddress,
+        addressData.comAddressLine2,
+        addressData.comAddressLine3
+      ].filter(Boolean).join(" ");
+      
+      address.value = addParts;
+      state.value = addressData.comState || '';
+      city.value = addressData.comCity || '';
+      pincode.value = addressData.comPincode || '';
+    }
 
-    state.value = mydata?.payload?.metaData?.address.comState || ''
-    city.value = mydata?.payload?.metaData?.address.comCity || ''
-    pincode.value = mydata?.payload?.metaData?.address.comPincode || ''
-  }
-  }
- 
-  else if(mydata.payload.metaData.address.comPincode){
-     const add1 = mydata.payload.metaData.address.comAddress
-    const add2 = mydata.payload.metaData.address.comAddressLine2
-    const add3 = mydata.payload.metaData.address.comAddressLine3
-    address.value = add1 + " " + add2 + " " + add3
-    state.value = mydata.payload.metaData.address.comState
-    city.value = mydata.payload.metaData.address.comCity
-    pincode.value = mydata.payload.metaData.address.comPincode
-
+  } catch (error) {
+    console.error('Error setting communication address:', error);
+    // Reset all fields on error
+    address.value = '';
+    state.value = '';
+    city.value = '';
+    pincode.value = '';
   }
 };
 

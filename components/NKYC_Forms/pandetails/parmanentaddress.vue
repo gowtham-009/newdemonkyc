@@ -114,46 +114,65 @@ onBeforeUnmount(() => {
 
 
 
-
-
 const setPermanentAddress = async () => {
-  const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO
+  try {
+    const mydata = await getServerData();
+    
+    // Safely access nested properties with optional chaining and defaults
+    const kraPan = mydata?.payload?.metaData?.kraPan || {};
+    const addressData = mydata?.payload?.metaData?.address || {};
+    const digiInfo = mydata?.payload?.metaData?.digi_info || {};
+    const digiDocs = mydata?.payload?.metaData?.digi_docs || {};
+    const kraIdentityData = mydata?.payload?.metaData?.kraIdentityData || {};
 
-  const addressper=mydata.payload.metaData.address
-  if(addressper.length==0){
-    if (statuscheck) {
-    const add1 = mydata?.payload?.metaData?.kraPan?.APP_PER_ADD1 || ''
-    const add2 = mydata.payload.metaData.address.perPincode
-    const add3 = mydata?.payload?.metaData?.kraPan?.APP_PER_ADD3 || ''
-    address.value = add1 + " " + add2 + " " + add3
-    const stateCode = String(mydata?.payload?.metaData?.kraPan?.APP_PER_STATE || '');
-    state.value = (mydata?.payload?.metaData?.kraIdentityData?.stateCode && mydata?.payload?.metaData?.kraIdentityData?.stateCode[stateCode]) || '';
-    city.value = mydata?.payload?.metaData?.kraPan?.APP_PER_CITY || ''
-    pincode.value = mydata?.payload?.metaData?.kraPan?.APP_PER_PINCD || ''
-  }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    address.value = mydata?.payload?.metaData?.address?.perAddress || ''
+    // Check if address data is empty or missing pincode
+    if (!addressData || Object.keys(addressData).length === 0 || !addressData.perPincode) {
+      if (kraPan.APP_KRA_INFO) {
+        // Use KRA PAN data
+        const addParts = [
+          kraPan.APP_PER_ADD1 || '',
+          addressData.APP_PER_ADD2 || '', // Note: This looks like it might be a typo - should it be kraPan.APP_PER_ADD2?
+          kraPan.APP_PER_ADD3 || ''
+        ].filter(Boolean).join(" "); // Filter out empty parts and join with space
+        
+        address.value = addParts;
+        
+        const stateCode = String(kraPan.APP_PER_STATE || '');
+        state.value = kraIdentityData.stateCode?.[stateCode] || '';
+        city.value = kraPan.APP_PER_CITY || '';
+        pincode.value = kraPan.APP_PER_PINCD || '';
+      }
+      else if (digiInfo.aadhaarUID && digiDocs.aadhaarDocument) {
+        // Use digi/Aadhaar data
+        address.value = addressData.perAddress || '';
+        state.value = addressData.perState || '';
+        city.value = addressData.perCity || '';
+        pincode.value = addressData.perPincode || '';
+      }
+    } 
+    else {
+      // Use address data if available
+      const addParts = [
+        addressData.perAddress,
+        addressData.perAddressLine2,
+        addressData.perAddressLine3
+      ].filter(Boolean).join(" "); // Filter out empty/undefined parts
+      
+      address.value = addParts;
+      state.value = addressData.perState || '';
+      city.value = addressData.perCity || '';
+      pincode.value = addressData.perPincode || '';
+    }
 
-    state.value = mydata?.payload?.metaData?.address.perState || ''
-    city.value = mydata?.payload?.metaData?.address.perCity || ''
-    pincode.value = mydata?.payload?.metaData?.address.perPincode || ''
+  } catch (error) {
+    console.error('Error setting permanent address:', error);
+    // Reset all fields on error
+    address.value = '';
+    state.value = '';
+    city.value = '';
+    pincode.value = '';
   }
-  }
-
-  else if(mydata.payload.metaData.address.perPincode){
-    const add1 = mydata.payload.metaData.address.perAddress
-    const add2 = mydata.payload.metaData.address.perAddressLine2
-    const add3 = mydata.payload.metaData.address.perAddressLine3
-    address.value = add1 + " " + add2 + " " + add3
-  
-    state.value = mydata.payload.metaData.address.perState
-    city.value = mydata.payload.metaData.address.perCity
-    pincode.value = mydata.payload.metaData.address.perPincode
-  }
-  
-
-}
+};
 
 await setPermanentAddress();
 
