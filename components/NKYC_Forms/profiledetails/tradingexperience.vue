@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -23,7 +23,7 @@
 
           <div class="w-full grid grid-cols-2 gap-2">
             <button v-for="option in options" :key="option.value" @click="selectMaritalStatus(option.value)" :class="[
-              'px-6 py-2 rounded-lg border-2 text-md font-normal w-full transition-all',
+              'px-6 py-2 rounded-lg border-2 text-md font-normal leading-5 w-full transition-all',
               selected === option.value
                 ? 'bg-blue-600 border-blue-600 text-white'
                 : 'bg-gray-200 border-gray-300 text-black'
@@ -73,10 +73,10 @@ const router = useRouter();
 // qualification Status
 const selected = ref("");
 const options = [
-  { label: "New to trading", value: "New to trading" },
-  { label: "1-2 years of experience", value: "1-2 years of experience" },
-  { label: "2-5 years of experience", value: "2-5 years of experience" },
-  { label: "5-10 years of experience", value: "5-10 years of experience" },
+  { label: "New to Trading", value: "New to Trading" },
+  { label: "1-2 Years of Experience", value: "1-2 Years of Experience" },
+  { label: "2-5 Years of Experience", value: "2-5 Years of Experience" },
+  { label: "5-10 Years of Experience", value: "5-10 Years of Experience" },
 
 ];
 

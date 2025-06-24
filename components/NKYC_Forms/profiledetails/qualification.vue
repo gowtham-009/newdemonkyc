@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -23,7 +23,7 @@
 
           <div class="w-full grid grid-cols-2 gap-2">
             <button v-for="option in options" :key="option.value" @click="selectMaritalStatus(option.value)" :class="[
-              'px-6 py-2 rounded-lg border-2 text-md font-normal w-full transition-all',
+              'px-6 py-2 rounded-lg border-2 text-md font-normal leading-5 w-full transition-all',
               selected === option.value
                 ? 'bg-blue-600 border-blue-600 text-white'
                 : 'bg-gray-200 border-gray-300 text-black'
@@ -78,11 +78,11 @@ const qulificationerror=ref('')
 const selected = ref("");
 const options = [
   { label: "Illiterate", value: "Illiterate" },
-  { label: "Under high school", value: "Under high school" },
+  { label: "Under High School", value: "Under High School" },
   { label: "High school", value: "High school" },
   { label: "Graduate", value: "Graduate" },
-  { label: "Post graduate", value: "Post graduate" },
-  { label: "Professional degree", value: "Professional degree" },
+  { label: "Post Graduate", value: "Post Graduate" },
+  { label: "Professional Degree", value: "Professional Degree" },
 ];
 
 const selectMaritalStatus = (value) => {
