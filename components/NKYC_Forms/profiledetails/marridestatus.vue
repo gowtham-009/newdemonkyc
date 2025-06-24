@@ -35,7 +35,7 @@
      
              <span class="text-red-500">{{ gendererror }}</span>
 
-        <div class="w-full  mt-2">
+        <div class="w-full  mt-3">
           <p class="text-gray-600 text-md font-medium ">Marital status</p>
           <div class="w-full flex gap-1">
             <button v-for="option in options" :key="option.value" @click="selectMaritalStatus(option.value)" :class="[
@@ -50,7 +50,7 @@
           </div>
         </div>
 <span class="text-red-500">{{ maritalerror }}</span>
-        <div class="w-full mt-2 ">
+        <div class="w-full mt-3 ">
           <span class="text-gray-600 text-md font-medium">
             Are you PEP/Related to PEP
           </span> <br>
