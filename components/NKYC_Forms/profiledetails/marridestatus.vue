@@ -29,11 +29,11 @@
               ]">
               {{ option.label }}
             </button>
-           
+
           </div>
         </div>
-     
-             <span class="text-red-500">{{ gendererror }}</span>
+
+        <span class="text-red-500">{{ gendererror }}</span>
 
         <div class="w-full  mt-3">
           <p class="text-gray-600 text-md font-medium ">Marital status</p>
@@ -49,7 +49,7 @@
 
           </div>
         </div>
-<span class="text-red-500">{{ maritalerror }}</span>
+        <span class="text-red-500">{{ maritalerror }}</span>
         <div class="w-full mt-3 ">
           <span class="text-gray-600 text-md font-medium">
             Are you PEP/Related to PEP
@@ -68,11 +68,11 @@
               ]">
                 {{ option.label }}
               </button>
-          
-                                      
+
+
             </div>
           </div>
-           <span class="text-red-500">{{ peperror }}</span>
+          <span class="text-red-500">{{ peperror }}</span>
 
         </div>
 
@@ -103,7 +103,7 @@ import { pagestatus } from '~/utils/pagestatus.js'
 import { useRouter } from 'vue-router';
 const router = useRouter();
 const { baseurl } = globalurl();
-const {htoken}=headerToken()
+const { htoken } = headerToken()
 const deviceHeight = ref(0);
 
 const buttonText = ref("Next");
@@ -114,9 +114,9 @@ const emit = defineEmits(['updateDiv']);
 const isStatusValid = ref(true);
 const isBack = ref(true);
 
-const gendererror=ref('')
-const maritalerror=ref('')
-const peperror=ref('')
+const gendererror = ref('')
+const maritalerror = ref('')
+const peperror = ref('')
 // gender status
 const selectedgender = ref("");
 const selectoptions = [
@@ -154,7 +154,7 @@ const clientstatus = (value) => {
 const profilesetinfo = async () => {
   try {
     const mydata = await getServerData();
-    
+
     // Safely access nested properties with optional chaining
     const kraPanData = mydata?.payload?.metaData?.kraPan;
     const personalData = mydata?.payload?.metaData?.personal || {};
@@ -170,7 +170,7 @@ const profilesetinfo = async () => {
 
         const marriedstatus = kraPanData?.APP_MAR_STATUS;
         selected.value = marriedstatus === '01' ? 'married' : marriedstatus === '02' ? 'unmarried' : 'other';
-      } 
+      }
       else if (digiInfo?.aadhaarUID && digiDocs?.aadhaarDocument) {
         // Use digi info data
         const gender = digiInfo?.gender;
@@ -179,7 +179,7 @@ const profilesetinfo = async () => {
         const marriedstatus = personalData?.maritalStatus;
         selected.value = marriedstatus || 'other'; // Provide default if undefined
       }
-    } 
+    }
     else if (personalData.maritalStatus || personalData.gender) {
       // Use personal data if available
       selectedgender.value = personalData.gender || 'Other';
@@ -188,7 +188,7 @@ const profilesetinfo = async () => {
 
     // Set PEP status with fallback
     clientselected.value = personalData?.pep || 'No, I am Not';
-    
+
   } catch (error) {
     console.error('Error processing profile info:', error);
     // Set default values in case of error
@@ -221,21 +221,56 @@ const back = () => {
   button.$el.appendChild(circle)
 
   setTimeout(async () => {
+   
+circle.remove();
+ const mydata = await getServerData();
+ if(mydata.payload.status=='ok'){
+  if(mydata.payload.metaData.address.sameAsPermanent === 'NO'){
+ 
 
-    circle.remove()
-   const data = await pagestatus('parmanentaddress')
-    if (data.payload.status == 'error') {
-      if (data.payload.code == '1002' || data.payload.code=='1004'){
-    alert(data.payload.message);
-    localStorage.removeItem('userkey')
-    router.push('/')
+     const data = await pagestatus('communicationaddress');
+     if (data.payload.status === 'error') {
+        if (data.payload.code === '1002' || data.payload.code === '1004') {
+          alert(data.payload.message);
+          localStorage.removeItem('userkey');
+          router.push('/');
+        }
+      }
+      else if(data.payload.status === 'ok'){
+        emit('updateDiv', 'communicationaddress');
+        isBack.value = false;
+      }
   }
+  else if(mydata.payload.metaData.address.sameAsPermanent === 'YES'){
+  
+    const data = await pagestatus('parmanentaddress');
+     if (data.payload.status === 'error') {
+        if (data.payload.code === '1002' || data.payload.code === '1004') {
+          alert(data.payload.message);
+          localStorage.removeItem('userkey');
+          router.push('/');
+        }
+      }
+      else if(data.payload.status === 'ok'){
+        emit('updateDiv', 'parmanentaddress');
+        isBack.value = false;
+      }
+      
+    
+    
+  }
+ }
+
+  else if (mydata.payload.status == 'error') {
+      if (mydata.payload.code == '1002' || mydata.payload.code=='1004'){
+            alert(mydata.payload.message);
+            localStorage.removeItem('userkey')
+            router.push('/')
+      }
 }
- else if (data.payload.status == 'ok') {
-  emit('updateDiv', 'parmanentaddress');
-  isBack.value = false;
-}
-  }, 600)
+
+
+}, 600)
 
 };
 
@@ -249,7 +284,7 @@ const personalinfo = async () => {
     maritalStatus: selected.value,
     pep: clientselected.value
   });
- const headertoken=htoken
+  const headertoken = htoken
   const payload = { payload: user };
   const jsonString = JSON.stringify(payload);
   try {
@@ -268,42 +303,42 @@ const personalinfo = async () => {
     }
     else {
       const data = await response.json()
-         gendererror.value=""
-     maritalerror.value =""
-     peperror.value=""
+      gendererror.value = ""
+      maritalerror.value = ""
+      peperror.value = ""
       if (data.payload.status == 'ok') {
         emit('updateDiv', 'clientinfo');
       }
- else if (data.payload.status == 'error') {
-        if (data.payload.code == '1002' || data.payload.code=='1004'){
-             alert(data.payload.message);
-              localStorage.removeItem('userkey')
-              router.push('/')
+      else if (data.payload.status == 'error') {
+        if (data.payload.code == '1002' || data.payload.code == '1004') {
+          alert(data.payload.message);
+          localStorage.removeItem('userkey')
+          router.push('/')
         }
 
-        else if(data.payload.status=='error' && data.payload.errors.length>0) {
-   
-    
-  data.payload.errors.forEach((err) => {
-    
+        else if (data.payload.status == 'error' && data.payload.errors.length > 0) {
 
-    if (err.field === 'gender' && !selectedgender.value) {
-      gendererror.value = err.message || ' ';
-    }
-    if (err.field === 'maritalStatus' && !selected.value) {
-      maritalerror.value = err.message || ' ';
-    }
-    if (err.field === 'pep' && !clientselected.value) {
-      peperror.value = err.message || ' ';
-    }
- 
-  });
-}
-       
+
+          data.payload.errors.forEach((err) => {
+
+
+            if (err.field === 'gender' && !selectedgender.value) {
+              gendererror.value = err.message || ' ';
+            }
+            if (err.field === 'maritalStatus' && !selected.value) {
+              maritalerror.value = err.message || ' ';
+            }
+            if (err.field === 'pep' && !clientselected.value) {
+              peperror.value = err.message || ' ';
+            }
+
+          });
+        }
+
       }
 
 
-   
+
     }
 
   } catch (error) {
@@ -329,7 +364,7 @@ const handleButtonClick = () => {
   setTimeout(() => {
     circle.remove()
     personalinfo()
-    isStatusValid.value=false
+    isStatusValid.value = false
   }, 600)
 };
 </script>
