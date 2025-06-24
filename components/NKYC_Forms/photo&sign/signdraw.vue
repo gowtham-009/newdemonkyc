@@ -284,24 +284,24 @@ const getsegmentdatadialog = async () => {
   const mydata = await getServerData();
   const statuscheck = mydata?.payload?.metaData?.additional_docs;
   if (statuscheck) {
-    question1.value = mydata?.payload?.metaData?.additional_docs?.documentConsentMode || 'Electronic'
-    question2.value = mydata?.payload?.metaData?.additional_docs?.contractNoteMode || 'Electronic'
-    question3.value = mydata?.payload?.metaData?.additional_docs?.standardDocsConsent || 'Electronic'
-    question4.value = mydata?.payload?.metaData?.additional_docs?.internetTradingOpted || 'Yes'
-    question5.value = mydata?.payload?.metaData?.additional_docs?.pastActionsDetails || 'No'
-    question6.value = mydata?.payload?.metaData?.additional_docs?.otherBrokerDetails || 'No'
-    question7.value = mydata?.payload?.metaData?.additional_docs?.otherDPDetails || 'CDSL'
-    question8.value = mydata?.payload?.metaData?.additional_docs?.accountSettlementPreference || 'Once in Quarter'
+    question1.value = mydata?.payload?.metaData?.additional_docs?.documentConsentMode
+    question2.value = mydata?.payload?.metaData?.additional_docs?.contractNoteMode 
+    question3.value = mydata?.payload?.metaData?.additional_docs?.standardDocsConsent 
+    question4.value = mydata?.payload?.metaData?.additional_docs?.internetTradingOpted 
+    question5.value = mydata?.payload?.metaData?.additional_docs?.pastActionsDetails 
+    question6.value = mydata?.payload?.metaData?.additional_docs?.otherBrokerDetails 
+    question7.value = mydata?.payload?.metaData?.additional_docs?.otherDPDetails 
+    question8.value = mydata?.payload?.metaData?.additional_docs?.accountSettlementPreference 
   }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    question1.value = mydata?.payload?.metaData?.additional_docs?.documentConsentMode || 'Electronic'
-    question2.value = mydata?.payload?.metaData?.additional_docs?.contractNoteMode || 'Electronic'
-    question3.value = mydata?.payload?.metaData?.additional_docs?.standardDocsConsent || 'Electronic'
-    question4.value = mydata?.payload?.metaData?.additional_docs?.internetTradingOpted || 'Yes'
-    question5.value = mydata?.payload?.metaData?.additional_docs?.pastActionsDetails || 'No'
-    question6.value = mydata?.payload?.metaData?.additional_docs?.otherBrokerDetails || 'No'
-    question7.value = mydata?.payload?.metaData?.additional_docs?.otherDPDetails || 'CDSL'
-    question8.value = mydata?.payload?.metaData?.additional_docs?.accountSettlementPreference || 'Once in Quarter'
+  else  {
+    question1.value = 'Electronic'
+    question2.value =  'Electronic'
+    question3.value =  'Electronic'
+    question4.value = 'Yes'
+    question5.value = 'No'
+    question6.value = 'No'
+    question7.value = 'CDSL'
+    question8.value = 'Once in Quarter'
   }
 
 };
@@ -713,13 +713,13 @@ const headertoken=htoken
     if (data.payload.status === 'ok') {
      visible.value=false
     }
- else if (data.payload.status == 'error') {
+  else if (data.payload.status == 'error') {
         if (data.payload.code == '1002' || data.payload.code=='1004'){
              alert(data.payload.message);
               localStorage.removeItem('userkey')
               router.push('/')
         }
-      }
+   }
     
   } catch (error) {
   
