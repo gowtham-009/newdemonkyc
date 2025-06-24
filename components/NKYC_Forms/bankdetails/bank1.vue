@@ -33,7 +33,7 @@
           </div>
 
           <div>
-            <span class="text-gray-500  text-sm">Account no</span>
+            <span class="text-gray-500  text-sm">Account No</span>
             <Accno v-model="accno" />
              <span class="text-red-500">{{ accnoerror }}</span>
 
@@ -41,7 +41,7 @@
 
 
           <div>
-            <span class="text-gray-500  text-sm">IFSC code</span>
+            <span class="text-gray-500  text-sm">IFSC Code</span>
             <IFSC v-model="ifsc" />
                   <span class="text-red-500">{{ ifscerror }}</span>
 
@@ -49,14 +49,14 @@
 
 
           <div>
-            <span class="text-gray-500  text-sm">MICR code</span>
+            <span class="text-gray-500  text-sm">MICR Code</span>
             <MICR v-model="micr" />
                   <span class="text-red-500">{{ micrerror }}</span>
 
           </div>
 
           <div>
-            <span class="text-gray-500  text-sm">Bank name</span>
+            <span class="text-gray-500  text-sm">Bank Name</span>
             <Bankname v-model="bankname" />
                   <span class="text-red-500">{{ banknameerror }}</span>
 
