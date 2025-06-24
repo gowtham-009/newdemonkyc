@@ -81,26 +81,21 @@ const options = [
 ];
 
 const selectMaritalStatus = (value) => {
-   tradingerror.value=''
+  tradingerror.value=''
   selected.value = value;
 };
 
 
 const profilesetinfo = async () => {
   const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
-
+  const statuscheck = mydata?.payload?.metaData?.personal?.tradingExperience;
   if (statuscheck) {
-
-    selected.value = mydata?.payload?.metaData?.personal?.tradingExperience || ''
-
+    selected.value = mydata?.payload?.metaData?.personal?.tradingExperience 
   }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    selected.value = mydata?.payload?.metaData?.personal?.tradingExperience || ''
+  else  {
+    selected.value = ''
   }
-  else {
-
-  }
+ 
 };
 
 await profilesetinfo()

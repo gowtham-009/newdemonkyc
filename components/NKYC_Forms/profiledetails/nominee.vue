@@ -325,7 +325,7 @@ const openNomineeDialog = async() => {
   
 const nomineedetails = async () => {
   const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO ;
+  const statuscheck = mydata?.payload?.metaData?.nominee ;
 
   if (statuscheck) {
     const nominee = mydata?.payload?.metaData?.nominee;
@@ -385,58 +385,7 @@ const nomineedetails = async () => {
       nomineecontainer.value = totalShare < 100;
     }
   }
-  else  {
-  
-    const nominee = mydata?.payload?.metaData?.nominee;
-    if (nominee) {
-      nomineescard.value = true;
-      const nomineeList = [];
-      let totalShare = 0;
-
-      for (let i = 1; i <= 10; i++) {
-        const name = nominee[`nominee${i}Name`];
-        if (name && name.trim() !== '') {
-          const share = parseFloat(nominee[`nominee${i}Share`] || 0);
-          totalShare += share;
-
-          nomineeList.push({
-            name,
-            id: i,
-            relation: nominee[`nominee${i}Relation`],
-            address: nominee[`nominee${i}Address`],
-            share,
-            email: nominee[`nominee${i}Email`],
-            mobile: nominee[`nominee${i}Mobile`],
-
-            dob: nominee[`nominee${i}Dob`],
-            idType: nominee[`nominee${i}IdType`],
-            idNo: nominee[`nominee${i}IdNo`],
-            guardian: nominee[`nominee${i}GuardianName`],
-          });
-        }
-      }
-
- let sharepercentage = 0
-
-   
-      nomineeList.forEach(item => {
-        sharepercentage += item.share
-      })
-
-      if (sharepercentage == 100) {
-       
-        canContinue.value = true;
-      }
-      else {
-        canContinue.value = false;
-      }
-
-      nomine.value = nomineeList;
-      nomineeCount.value = nomineeList.length;
-      nomineecontainer.value = totalShare < 100;
-    }
-  }
-};
+ };
 
 
 await nomineedetails()
