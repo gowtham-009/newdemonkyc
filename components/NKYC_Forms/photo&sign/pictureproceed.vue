@@ -84,29 +84,16 @@ const clientname = ref('')
 const getsegmentdata = async () => {
   const mydata = await getServerData();
     const headertoken=htoken
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
+  const statuscheck = mydata?.payload?.metaData?.proofs?.ipvImg;
   if (statuscheck) {
     clientname.value = mydata?.payload?.metaData?.profile?.clientName
-    const segments = mydata?.payload?.metaData?.proofs?.ipvImg || '';
-    if (segments) {
-      const imageauth = headertoken;
+    const segments = mydata?.payload?.metaData?.proofs?.ipvImg;
+    const imageauth = headertoken;
       const userToken = localStorage.getItem('userkey');
       const imgSrc = `${baseurl.value}/view/uploads/${imageauth}/${userToken}/${segments}`;
-
-      srcUrl.value = imgSrc; // ✅ Set image to component
-    }
+      srcUrl.value = imgSrc; 
   }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    const segments = mydata?.payload?.metaData?.proofs?.ipvImg || '';
-    if (segments) {
-      clientname.value = mydata?.payload?.metaData?.profile?.clientName
-      const imageauth = headertoken;
-      const userToken = localStorage.getItem('userkey');
-      const imgSrc = `${baseurl.value}/view/uploads/${imageauth}/${userToken}/${segments}`;
-
-      srcUrl.value = imgSrc; // ✅ Set image to component
-    }
-  }
+  
 };
 
 onMounted(async () => {
