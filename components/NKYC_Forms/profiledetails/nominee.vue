@@ -49,8 +49,7 @@
                     size="small">Delete</Button>
                 </div>
               </div>
- <p class="text-red-500 text-md text-center">{{ errorpercent }}</p>
-        
+               <p class="text-red-500 text-md text-center">{{ errorpercent }}</p>
             </div>
           </div>
 
