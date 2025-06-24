@@ -894,12 +894,11 @@ const back = () => {
   600)
 
 };
-
-
-const handleButtonClick = (event) => {
+const handleButtonClick = async (event) => {
   const button = rippleBtn.value;
-  if (!button) return;
+  if (!button || !button.$el) return;
 
+  // Create ripple effect
   const circle = document.createElement('span');
   circle.classList.add('ripple');
 
@@ -914,33 +913,43 @@ const handleButtonClick = (event) => {
 
   setTimeout(async () => {
     circle.remove();
-   
-    const mydata = await pagestatus('bank1')
-    if (mydata.payload.status == 'ok') {
-       emit('updateDiv', 'bank1');
-      // console.log("erioj",sharepercentage)
 
-      // if(sharepercentage<100){
-      //   errorpercent.value='Nominee 100 percentage not met'
-       
-      // }
-      // else{
-       
-      // }
-      
-    }
-    else if (mydata.payload.status == 'error') {
-        if (mydata.payload.code == '1002' || mydata.payload.code=='1004'){
-             alert(mydata.payload.message);
-              localStorage.removeItem('userkey')
-              router.push('/')
+    try {
+      const data = await getServerData();
+
+      if (data?.payload?.status === 'ok' && data?.payload?.metaData?.nominee?.clientCode) {
+        const nominee = data.payload.metaData.nominee;
+        let totalShare = 0;
+
+        for (let i = 1; i <= 10; i++) {
+          const share = parseFloat(nominee[`nominee${i}Share`] || 0);
+          totalShare += share;
         }
-       
+
+        console.log("Total nominee share:", totalShare);
+
+        if (totalShare === 100) {
+          const myData = await pagestatus('bank1');
+          if (myData?.payload?.status === 'ok') {
+            emit('updateDiv', 'bank1');
+          }
+        } else {
+          errorpercent.value = 'Nominee 100 percentage not met';
+        }
+
+      } else if (data?.payload?.status === 'error') {
+        if (data.payload.code === '1002' || data.payload.code === '1004') {
+          alert(data.payload.message);
+          localStorage.removeItem('userkey');
+          router.push('/');
+        }
       }
 
-isStatusValid.value=false
-
-
+    } catch (err) {
+      console.error('Error during server interaction:', err);
+    } finally {
+      isStatusValid.value = false;
+    }
 
   }, 600);
 };
