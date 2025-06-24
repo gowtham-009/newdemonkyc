@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -356,76 +356,82 @@ const back = (event) => {
   }, 600);
 };
 
-const handleButtonClick = (event) => {
-  const button = rippleBtn.value;
-  const circle = document.createElement('span');
-  circle.classList.add('ripple');
+const handleButtonClick = async (event) => {
+  try {
+    // Ripple effect
+    const button = rippleBtn.value;
+    const circle = document.createElement('span');
+    circle.classList.add('ripple');
 
-  const rect = button.$el.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
+    const rect = button.$el.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
-  circle.style.left = `${x}px`;
-  circle.style.top = `${y}px`;
-  button.$el.appendChild(circle);
+    circle.style.left = `${x}px`;
+    circle.style.top = `${y}px`;
+    button.$el.appendChild(circle);
 
-  setTimeout(async () => {
-    circle.remove();
+    // Remove ripple after animation
+    setTimeout(() => circle.remove(), 600);
+
+    // Fetch server data
     const mydata = await getServerData();
+    
+    // Handle error response
+    if (mydata.payload?.status === 'error') {
+      if (mydata.payload.code === '1002' || mydata.payload.code === '1004') {
+        alert(mydata.payload.message);
+        localStorage.removeItem('userkey');
+        router.push('/');
+      }
+      return;
+    }
+
     const digilockpan = mydata?.payload?.metaData?.digi_docs?.panDocument;
     const pancardName = mydata?.payload?.metaData?.proofs?.pancard;
+
+    // Case 1: Digilock PAN exists
     if (digilockpan) {
       const panslice = digilockpan.replace(/\.pdf$/i, ".png");
+      
       if (panslice === pancardName) {
         const statuscheck1 = mydata?.payload?.metaData?.bank?.bank1HolderName;
-      if (statuscheck1) {
-        const nextPage = await pagestatus('photosign1');
-        if (nextPage.payload.status === 'ok') {
-          emit('updateDiv', 'photosign1');
+        
+        if (statuscheck1) {
+          const nextPage = await pagestatus('photosign1');
+          if (nextPage.payload.status === 'ok') {
+            emit('updateDiv', 'photosign1');
+          }
+        } else {
+          await pagestatus('uploadbank');
+          emit('updateDiv', 'uploadbank');
         }
+      }
+    } 
+    // Case 2: PAN overwrite is true and pancardName exists
+    else if (panoverwite.value === true && pancardName) {
+      const bankcheck = mydata?.payload?.metaData?.bank?.bank1HolderName;
+      
+      if (bankcheck) {
+        await pagestatus('photosign1');
+        emit('updateDiv', 'photosign1');
+        isStatusValid.value = false;
       } else {
         await pagestatus('uploadbank');
         emit('updateDiv', 'uploadbank');
-      }
-      }
-    }
-
-    else if (mydata.payload.status == 'error') {
-        if (mydata.payload.code == '1002' || mydata.payload.code=='1004'){
-             alert(mydata.payload.message);
-              localStorage.removeItem('userkey')
-              router.push('/')
-        }
-       
-      }
-
-
-    else if(panoverwite.value===true && pancardName){
-   
-      if(pancardName){
-
-        const bankcheck = mydata?.payload?.metaData?.bank?.bank1HolderName;
-        if(bankcheck){
-            await pagestatus('photosign1');
-              emit('updateDiv', 'photosign1');
-              isStatusValid.value = false;
-        }else{
-          await pagestatus('uploadbank');
-          emit('updateDiv', 'uploadbank');
-          isStatusValid.value = false;
-        }
-      }
-      else{
-  proofupload();
         isStatusValid.value = false;
-     
       }
-
+    } 
+    // Default case
+    else {
+      proofupload();
+      isStatusValid.value = false;
     }
 
-
-
-  }, 600);
+  } catch (error) {
+    console.error('Error in handleButtonClick:', error);
+    // Handle error appropriately (e.g., show error message to user)
+  }
 };
 
 onMounted(async () => {
