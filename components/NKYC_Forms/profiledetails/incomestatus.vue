@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -66,34 +66,34 @@ const isBack = ref(true);
 const incomeerror=ref('')
 const selected = ref("");
 const options = [
-  { label: "Below 1 lakh", value: "Below 1 lakh" },
-  { label: "1 lakh to 5 lakhs", value: "1 lakh to 5 lakhs" },
-  { label: "5 lakhs to 10 lakhs", value: "5 lakhs to 10 lakhs" },
-  { label: "10 lakhs to 25 lakhs", value: "10 lakhs to 25 lakhs" },
-  { label: "Above 25 lakhs", value: "Above 25 lakhs" },
+  { label: "Below 1 lakh", value: "BELOW 1 LAC" },
+  { label: "1 lakh to 5 lakhs", value: "1-5 LAC" },
+  { label: "5 lakhs to 10 lakhs", value: "5-10 LAC" },
+  { label: "10 lakhs to 25 lakhs", value: "10-25 LAC" },
+  { label: "Above 25 lakhs", value: "> 25 LAC" },
 
 ];
 
 const selectMaritalStatus = (value) => {
-   incomeerror.value=''
+  incomeerror.value=''
   selected.value = value;
 };
 
 
 const profilesetinfo = async () => {
-  const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
+  try {
+    const mydata = await getServerData();
+    const incomeData = mydata?.payload?.metaData?.kraPan?.APP_INCOME
+    const personalIncome = mydata?.payload?.metaData?.personal?.annualIncome || '';
+    const kraIncome = mydata?.payload?.metaData?.kraIdentityData?.income?.[incomeData] || '';
+    selected.value = personalIncome || kraIncome;
+    if (!selected.value) {
+      selected.value = '';
+    }
 
-  if (statuscheck) {
-
-    selected.value = mydata?.payload?.metaData?.personal?.annualIncome || ''
-
-  }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    selected.value = mydata?.payload?.metaData?.personal?.annualIncome || ''
-  }
-  else {
-
+  } catch (error) {
+    console.error('Error in profilesetinfo:', error);
+    
   }
 };
 

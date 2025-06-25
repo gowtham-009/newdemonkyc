@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo />
+      <logo  />
       <profile />
     </div>
 
@@ -67,16 +67,16 @@ const selected = ref("");
 const isBack = ref(true);
 const occupationerror=ref('')
 const options = [
-  { label: "Agriculturist ", value: "Agriculturist " },
-  { label: "Business", value: "Business" },
-  { label: "Govt.Service", value: "Govt.Service" },
-  { label: "Housewife", value: "Housewife" },
-  { label: "Private Sector", value: "Private Sector" },
-  { label: "Public Sector", value: "Public Sector" },
-  { label: "Professional", value: "Professional" },
-  { label: "Retired", value: "Retired" },
-  { label: "Student", value: "Student" },
-  { label: "Others", value: "Others" },
+  { label: "Agriculturist ", value: "AGRICULTURIST " },
+  { label: "Business", value: "BUSINESS" },
+  { label: "Govt.Service", value: "GOVERNMENT SERVICE" },
+  { label: "Housewife", value: "HOUSEWIFE" },
+  { label: "Private Sector", value: "PRIVATE SECTOR SERVICE" },
+  { label: "Public Sector", value: "PUBLIC SECTOR" },
+  { label: "Professional", value: "PROFESSIONAL" },
+  { label: "Retired", value: "RETIRED" },
+  { label: "Student", value: "STUDENT" },
+  { label: "Others", value: "OTHERS" },
 ];
 
 const selectMaritalStatus = (value) => {
@@ -87,22 +87,21 @@ const selectMaritalStatus = (value) => {
 };
 
 const profilesetinfo = async () => {
-  const mydata = await getServerData();
-  const statuscheck = mydata?.payload?.metaData?.kraPan?.APP_KRA_INFO || '';
+  try {
+    const mydata = await getServerData();
+    const occupationData = mydata?.payload?.metaData?.kraPan?.APP_OCC
+    const personalOccupation = mydata?.payload?.metaData?.personal?.occupation || '';
+    const kraOccupation = mydata?.payload?.metaData?.kraIdentityData?.occupation?.[occupationData] || '';
+    selected.value = personalOccupation || kraOccupation;
+    if (!selected.value) {
+      selected.value = '';
+    }
 
-  if (statuscheck) {
-
-    selected.value = mydata?.payload?.metaData?.personal?.occupation || ''
-
-  }
-  else if (mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument) {
-    selected.value = mydata?.payload?.metaData?.personal?.occupation || ''
-  }
-  else {
-
+  } catch (error) {
+    console.error('Error in profilesetinfo:', error);
+    
   }
 };
-
 
 await profilesetinfo()
 

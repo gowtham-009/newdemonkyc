@@ -73,6 +73,7 @@
             </div>
           </div>
           <span class="text-red-500">{{ peperror }}</span>
+          <span class="text-red-500">{{ commonerror }}</span>
 
         </div>
 
@@ -117,6 +118,7 @@ const isBack = ref(true);
 const gendererror = ref('')
 const maritalerror = ref('')
 const peperror = ref('')
+const commonerror=ref('')
 // gender status
 const selectedgender = ref("");
 const selectoptions = [
@@ -126,7 +128,8 @@ const selectoptions = [
 ];
 
 const selectGenderStatus = (value) => {
-   gendererror.value=''
+  gendererror.value=''
+  commonerror.value=""
   selectedgender.value = value;
 };
 // Marital Status
@@ -138,6 +141,7 @@ const options = [
 
 const selectMaritalStatus = (value) => {
   maritalerror.value=''
+  commonerror.value=""
   selected.value = value;
 };
 
@@ -148,7 +152,8 @@ const clientoptions = [
 ];
 
 const clientstatus = (value) => {
-  peperror.value=''
+  peperror.value=""
+  commonerror.value=""
   clientselected.value = value;
 };
 
@@ -170,7 +175,6 @@ const profilesetinfo = async () => {
         // Use KRA data
         const gender = kraPanData?.APP_GEN;
         selectedgender.value = gender === 'M' ? 'Male' : gender === 'F' ? 'Female' : 'Other';
-
         const marriedstatus = kraPanData?.APP_MAR_STATUS;
         selected.value = marriedstatus === '01' ? 'married' : marriedstatus === '02' ? 'unmarried' : 'other';
       }
@@ -180,13 +184,13 @@ const profilesetinfo = async () => {
         selectedgender.value = gender === 'MALE' ? 'Male' : gender === 'FEMALE' ? 'Female' : 'Other';
 
         const marriedstatus = personalData?.maritalStatus;
-        selected.value = marriedstatus || 'other'; // Provide default if undefined
+        selected.value = marriedstatus 
       }
     }
     else if (personalData.maritalStatus || personalData.gender) {
       // Use personal data if available
-      selectedgender.value = personalData.gender || 'Other';
-      selected.value = personalData.maritalStatus || 'other';
+      selectedgender.value = personalData.gender ;
+      selected.value = personalData.maritalStatus ;
     }
 
     // Set PEP status with fallback
@@ -195,8 +199,8 @@ const profilesetinfo = async () => {
   } catch (error) {
     console.error('Error processing profile info:', error);
     // Set default values in case of error
-    selectedgender.value = 'Other';
-    selected.value = 'other';
+    selectedgender.value = '';
+    selected.value = '';
     clientselected.value = 'No, I am Not';
   }
 };
@@ -287,9 +291,10 @@ const personalinfo = async () => {
     maritalStatus: selected.value,
     pep: clientselected.value
   });
-  const headertoken = htoken
+
+  const headertoken = htoken;
   const payload = { payload: user };
-  const jsonString = JSON.stringify(payload);
+
   try {
     const response = await fetch(apiurl, {
       method: 'POST',
@@ -297,57 +302,56 @@ const personalinfo = async () => {
         'Authorization': headertoken,
         'Content-Type': 'application/json',
       },
-      body: jsonString,
-    })
+      body: JSON.stringify(payload),
+    });
 
     if (!response.ok) {
-      throw new Error("Network is error", response.status);
-
+      throw new Error(`Network error: ${response.status}`);
     }
-    else {
-      const data = await response.json()
-      gendererror.value = ""
-      maritalerror.value = ""
-      peperror.value = ""
-      if (data.payload.status == 'ok') {
-        emit('updateDiv', 'clientinfo');
+
+    const data = await response.json();
+
+    // Reset errors
+    gendererror.value = "";
+    maritalerror.value = "";
+    peperror.value = "";
+    commonerror.value = "";
+
+    if (data?.payload?.status === 'ok') {
+      emit('updateDiv', 'clientinfo');
+    } else if (data?.payload?.status === 'error') {
+      const code = data.payload.code;
+      const message = data.payload.message;
+
+      if (code === '1002' || code === '1004') {
+        alert(message);
+        localStorage.removeItem('userkey');
+        router.push('/');
+      } else if (code === 'F1002') {
+        commonerror.value = message || "Something went wrong.";
+        
+      } else if (Array.isArray(data.payload.errors)) {
+        data.payload.errors.forEach(err => {
+          if (err.field === 'gender' && !selectedgender.value) {
+            gendererror.value = err.message || ' ';
+          }
+          if (err.field === 'maritalStatus' && !selected.value) {
+            maritalerror.value = err.message || ' ';
+          }
+          if (err.field === 'pep' && !clientselected.value) {
+            peperror.value = err.message || ' ';
+          }
+        });
+      } else {
+        commonerror.value = message || "An unknown error occurred.";
       }
-      else if (data.payload.status == 'error') {
-        if (data.payload.code == '1002' || data.payload.code == '1004') {
-          alert(data.payload.message);
-          localStorage.removeItem('userkey')
-          router.push('/')
-        }
-
-        else if (data.payload.status == 'error' && data.payload.errors.length > 0) {
-
-
-          data.payload.errors.forEach((err) => {
-
-
-            if (err.field === 'gender' && !selectedgender.value) {
-              gendererror.value = err.message || ' ';
-            }
-            if (err.field === 'maritalStatus' && !selected.value) {
-              maritalerror.value = err.message || ' ';
-            }
-            if (err.field === 'pep' && !clientselected.value) {
-              peperror.value = err.message || ' ';
-            }
-
-          });
-        }
-
-      }
-
-
-
     }
 
   } catch (error) {
-    console.log(error.message)
+    console.error("Error occurred:", error.message);
+    commonerror.value = "Unexpected error. Please try again.";
   }
-}
+};
 
 
 const handleButtonClick = () => {
