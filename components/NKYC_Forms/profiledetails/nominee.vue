@@ -258,8 +258,12 @@ const statementOptions = ref([
   { value: 'Spouse', name: 'Spouse' },
   { value: 'Father', name: 'Father' },
   { value: 'Mother', name: 'Mother' },
-  { value: 'Brother', name: 'Brother' }
-
+  { value: 'Brother', name: 'Brother' },
+    { value: 'Sister', name: 'Sister' },
+      { value: 'Grand-Son', name: 'Grand-Son' },
+       { value: 'Grand-Daughter', name: 'Grand-Daughter' },
+{ value: 'Grand-Father', name: 'Grand-Father' },
+{ value: 'Grand-Mother', name: 'Grand-Mother' },
 ])
 
 const name = ref('');
