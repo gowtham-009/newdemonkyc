@@ -1,15 +1,21 @@
+
 <template>
   <div class="flex flex-col justify-center items-center">
     <div class="camera-wrapper" :class="{
       'border-blue-400': !readyToCapture && !imageCaptured,
       'border-green-500': readyToCapture || imageCaptured,
     }">
-      <video ref="video" autoplay playsinline v-if="!imageCaptured && cameraActive" class="camera-video" />
+      <!-- Loading text shown when camera is not active -->
+      <div v-if="!cameraReady" class="absolute inset-0 flex items-center justify-center text-gray-500">
+        Loading camera...
+      </div>
+      
+      <video ref="video" autoplay playsinline v-show="cameraReady && !imageCaptured && cameraActive" class="camera-video" />
       <img v-if="imageCaptured" :src="capturedImage" alt="Captured Face" class="camera-image" />
       <canvas ref="canvas" class="hidden"></canvas>
 
       <!-- Visual guides -->
-      <div class="center-guide" v-if="!imageCaptured">
+      <div class="center-guide" v-if="!imageCaptured && cameraReady">
         <div class="crosshair"></div>
         <div class="distance-ring" :class="{ 'ring-green': readyToCapture }"></div>
         <!-- Axis lines -->
@@ -19,8 +25,8 @@
     </div>
 
     <!-- Status indicators -->
-    <div class="status-indicators mt-1 text-center">
-      <div class="">
+    <div class="status-indicators mt-1 w-full text-center flex justify-center gap-2 bg-yellow-100" v-if="cameraReady">
+      <div>
         <span class="font-medium">Position: </span>
         <span :class="{
           'text-red-500': !isFaceCentered && !imageCaptured,
@@ -33,14 +39,10 @@
 
       <div>
         <span class="font-medium">Distance: </span>
-        <span :class="{
-          'text-red-500': faceDistanceScore < 70 && !imageCaptured,
-          'text-green-500': faceDistanceScore >= 70 || imageCaptured
-        }">
+        <span :class="{'text-red-500': faceDistanceScore < 70 && !imageCaptured, 'text-green-500': faceDistanceScore >= 70 || imageCaptured}">
           {{ faceDistanceScore.toFixed(0) }}%
-          <span v-if="faceDistanceScore >= 70 || imageCaptured">✅</span>
-          <span v-else>❌ (Need 70%+)</span>
         </span>
+        <span v-if="faceDistanceScore >= 70 || imageCaptured">✅</span>
       </div>
     </div>
 
@@ -59,6 +61,7 @@ const canvas = ref(null)
 const capturedImage = ref(null)
 const imageCaptured = ref(false)
 const cameraActive = ref(true)
+const cameraReady = ref(false) 
 const faceDistanceScore = ref(0)
 const isFaceCentered = ref(false)
 const faceDetected = ref(false)
@@ -67,45 +70,39 @@ const multipleFacesDetected = ref(false)
 let mediaStream = null
 let alertShown = false
 
+// Frame settings
+const FRAME_SIZE = 300
+const CENTER_TOLERANCE = 20
+const MIN_DISTANCE_SCORE = 70
 
-const retakePhoto = () => {
-  // Clear the captured image
-  capturedImage.value = null;
-  imageCaptured.value = false;
-  
-  // Restart the camera
-  stopCamera();
-  startCamera();
-};
-
-defineExpose({
-  retakePhoto
-});
 
 
 const startCamera = async () => {
   try {
-    cameraActive.value = true;
+    cameraActive.value = true
+    cameraReady.value = false // Show loading text initially
+    
     mediaStream = await navigator.mediaDevices.getUserMedia({
       video: {
         width: FRAME_SIZE,
         height: FRAME_SIZE,
         facingMode: 'user'
       }
-    });
-    video.value.srcObject = mediaStream;
-    startDetectionLoop();
+    })
+    
+    video.value.srcObject = mediaStream
+    
+    // Wait for video to be ready to play
+    video.value.onloadedmetadata = () => {
+      cameraReady.value = true // Hide loading text and show video
+      startDetectionLoop()
+    }
+    
   } catch (err) {
-    emit('error', { message: 'Could not access camera: ' + err.message });
+    emit('error', { message: 'Could not access camera: ' + err.message })
+    cameraReady.value = false
   }
-};
-
-
-// Frame settings
-const FRAME_SIZE = 300
-const CENTER_TOLERANCE = 20
-const MIN_DISTANCE_SCORE = 70
-
+}
 const loadModels = async () => {
   await faceapi.nets.tinyFaceDetector.loadFromUri('/models/tiny_face_detector')
   await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face_landmark_68')
@@ -220,23 +217,12 @@ const facePositionStatus = computed(() => {
 
 onMounted(async () => {
   await loadModels()
-  try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: FRAME_SIZE,
-        height: FRAME_SIZE,
-        facingMode: 'user'
-      }
-    })
-    video.value.srcObject = mediaStream
-    video.value.onloadeddata = () => startDetectionLoop()
-  } catch (err) {
-    console.error('Camera error:', err)
-  }
+  startCamera()
 })
 </script>
 
 <style scoped>
+/* Previous styles remain the same */
 .camera-wrapper {
   width: 300px;
   height: 300px;
@@ -258,6 +244,9 @@ onMounted(async () => {
 
 .camera-video,
 .camera-image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -345,7 +334,7 @@ onMounted(async () => {
 
 .status-indicators {
   min-width: 250px;
-  background: rgba(0, 0, 0, 0.05);
+ 
   padding: 1%;
   border-radius: 8px;
 }
