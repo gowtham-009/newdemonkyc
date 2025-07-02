@@ -7,7 +7,7 @@
     }">
       <!-- Loading text shown when camera is not active -->
       <div v-if="!cameraReady" class="absolute inset-0 flex items-center justify-center text-gray-500">
-        Loading camera...
+       <LOADING/>
       </div>
       
       <video ref="video" autoplay playsinline v-show="cameraReady && !imageCaptured && cameraActive" class="camera-video" />
@@ -53,6 +53,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import * as faceapi from 'face-api.js'
+import LOADING from '@/components/googlebouncing.vue'
 
 const emit = defineEmits(['captured'])
 
