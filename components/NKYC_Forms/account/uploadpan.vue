@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -126,7 +126,7 @@ const getsegmentdata = async () => {
   const segments = mydata?.payload?.metaData?.proofs?.pancard ;
 
   if (
-   
+  
     mydata?.payload?.metaData?.digi_info?.aadhaarUID && mydata?.payload?.metaData?.digi_docs?.aadhaarDocument
   ) {
 
@@ -139,7 +139,7 @@ const getsegmentdata = async () => {
   panoverwitesrc.value = imgSrc;
   isImageValid.value = true;  
   isStatusValid.value = true;
-  //imageSrcpan.value = imgSrc; // Also set imageSrcpan to ensure consistency
+
 }
     else{
        pancard.value=true
@@ -265,7 +265,7 @@ const proofupload = async () => {
     const blob = await response.blob();
 
     // Create encrypted JSON payload
-    const encryptedPayload = encryptionrequestdata({
+    const encryptedPayload =await encryptionrequestdata({
       userToken: localStorage.getItem('userkey'),
       pageCode: 'uploadbank',
     });
@@ -291,7 +291,8 @@ const proofupload = async () => {
       throw new Error(`Network error: ${uploadResponse.status}`);
     }
 
-    const data = await uploadResponse.json();
+    const decryptedData = await uploadResponse.json();
+    const data = await decryptionresponse(decryptedData);
     if (data.payload.status === 'ok') {
       completeProgress();
       const mydata = await getServerData();

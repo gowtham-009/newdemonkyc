@@ -3,7 +3,7 @@
         <div class="w-full px-3 primary_color flex justify-between items-center"
             :style="{ height: deviceHeight * 0.08 + 'px' }">
 
-            <logo  />
+            <logo style="width: 40px; height: 40px;" />
             <profile />
 
         </div>
@@ -174,7 +174,6 @@ const handleButtonClick = () => {
         const digiadd = data?.payload?.metaData?.digi_info.aadhaarUID
         const panInfo = data?.payload?.metaData?.kraPan?.APP_KRA_INFO;
 
-
         if(panInfo){
             pagestatus('parmanentaddress');
           emit('updateDiv', 'parmanentaddress');
@@ -203,6 +202,7 @@ const handleButtonClick = () => {
 
 
 function back() {
+
     const button = rippleBtnback.value
     const circle = document.createElement('span')
     circle.classList.add('ripple')

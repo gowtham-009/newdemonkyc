@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -284,7 +284,7 @@ circle.remove();
 
 const personalinfo = async () => {
   const apiurl = `${baseurl.value}personal_info`;
-  const user = encryptionrequestdata({
+  const user =await encryptionrequestdata({
     userToken: localStorage.getItem('userkey'),
     pageCode: "clientinfo",
     gender: selectedgender.value,
@@ -309,8 +309,8 @@ const personalinfo = async () => {
       throw new Error(`Network error: ${response.status}`);
     }
 
-    const data = await response.json();
-
+    const decryptedData = await response.json();
+  const data = await decryptionresponse(decryptedData);
     // Reset errors
     gendererror.value = "";
     maritalerror.value = "";

@@ -2,7 +2,7 @@
   <div class="primary_color">
     <!-- Header -->
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -182,7 +182,7 @@ const permanentaddressdata = async () => {
 
   const apiurl = `${baseurl.value}address`;
   const pageCode = commAddressRef.value?.confirm ? "address" : "communicationaddress";
-  const user = encryptionrequestdata({
+  const user =await encryptionrequestdata({
     userToken: localStorage.getItem('userkey'),
     comAddSameAsPermanent: commAddressRef.value?.confirm ? "YES" : "NO",
     pageCode: pageCode,
@@ -211,7 +211,8 @@ const permanentaddressdata = async () => {
 
     }
     else {
-      const data = await response.json()
+      const decryptedData = await response.json()
+      const  data= await decryptionresponse(decryptedData);
         addresserror.value = ""
         cityerror.value = ""
         stateerror.value = ""

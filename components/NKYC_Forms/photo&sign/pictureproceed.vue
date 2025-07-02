@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
     <div class="flex justify-between  p-2 flex-col bg-white rounded-t-3xl dark:bg-black"
@@ -154,7 +154,7 @@ const documentsavebtn = async () => {
 
 
   const apiurl = `${baseurl.value}additional_docs`;
-  const user = encryptionrequestdata({
+  const user =await encryptionrequestdata({
     userToken: localStorage.getItem('userkey'),
     pageCode: "signdraw",
     documentConsentMode: question1.value || 'Electronic',
@@ -186,7 +186,8 @@ const documentsavebtn = async () => {
       throw new Error(`Network error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const decryptedData = await response.json();
+    const data = await decryptionresponse(decryptedData);
     if (data.payload.status === 'ok') {
       emit('updateDiv', 'signdraw');
       isStatusValid.value = false;

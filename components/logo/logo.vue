@@ -1,6 +1,6 @@
 <template>
     <div>
-        <img src="~/assets/image/circle.png" alt="logo" class="h-16 w-16" >
+        <img src="~/assets/image/logo_nkyc.png" width="90" height="90" alt="logo"  >
     </div>
 </template>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
 
@@ -41,7 +41,7 @@
     </div>
           </div>
 
-          <div v-if="bankerror" class="w-full p-1 mt-2 bg-red-100 px-1 py-1">
+          <div v-if="bankerror" class="w-full p-1 mt-2 rounded-lg bg-red-100 px-1 py-1">
             <p class="text-center text-red-500 text-md">{{ errorbank }}</p>
 
           </div>
@@ -277,7 +277,7 @@ const proofupload = async () => {
     formData.append('bank', blob, imageSrcbank.value.isPdf ? 'document.pdf' : 'image.jpg');
 
     // Add metadata
-    const metadata = encryptionrequestdata({
+    const metadata =await encryptionrequestdata({
       userToken: localStorage.getItem('userkey'),
       pageCode: "photosign1"
     });
@@ -294,8 +294,8 @@ const headertoken=htoken
 
     if (!uploadResponse.ok) throw new Error(`Network error: ${uploadResponse.status}`);
 
-    const data = await uploadResponse.json();
-    
+    const decryptedData = await uploadResponse.json();
+    const data = await decryptionresponse(decryptedData);
     if (data.payload.status === 'ok') {
       completeProgress();
       const mydata = await pagestatus('photosign1');

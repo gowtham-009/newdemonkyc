@@ -39,7 +39,7 @@ export async function pagestatus(pagecode) {
 
   const profilecode = profileCodeMap[pagecode] || 0; // fallback to 0 if not matched
 
-  const encryptedUser = encryptionrequestdata({
+  const encryptedUser = await encryptionrequestdata({
     userToken: userkey,
     pageCode: pagecode,
     profileCode: profilecode
@@ -63,7 +63,8 @@ export async function pagestatus(pagecode) {
     }
 
     const data = await response.json();
-    return data;
+     const decryptedData = await decryptionresponse(data);
+    return decryptedData;
   } catch (error) {
     console.error('Fetch error:', error);
     return null;

@@ -2,7 +2,7 @@
     <div class="primary_color">
         <div class="flex justify-between primary_color items-center px-3"
             :style="{ height: deviceHeight * 0.08 + 'px' }">
-            <logo  />
+            <logo style="width: 40px; height: 40px;" />
             <profile />
         </div>
         <!--  -->
@@ -161,10 +161,10 @@ const digilocker_create = async () => {
     const apiurl = baseurl.value + 'digilocker';
      const headertoken=htoken
     const authorization = headertoken;
-    const user = encryptionrequestdata({
+    const user =await encryptionrequestdata({
         userToken: localStorage.getItem('userkey'),
         digilockerAction: "createUrl",
-        redirecUrl: "https://newdemonkyc.vercel.app/main"
+        redirecUrl: "https://nkcynewone.vercel.app/main"
     });
 
     const payload = { payload: user };
@@ -183,7 +183,8 @@ const digilocker_create = async () => {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const decryptedData = await response.json();
+        const data = await decryptionresponse(decryptedData);
         if (data.payload.status == 'ok') {
 
             const url = data.payload.metaData.url
@@ -214,7 +215,7 @@ const digilocker_request = async () => {
     const apiurl = baseurl.value + 'digilocker';
  const headertoken=htoken
     const authorization = headertoken;
-        const user = encryptionrequestdata({
+        const user =await encryptionrequestdata({
         userToken: localStorage.getItem('userkey'),
         digilockerAction: "getDetails",
         digilockerReqId: route.query.requestId
@@ -236,7 +237,8 @@ const digilocker_request = async () => {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();
+           const decryptedData = await response.json();
+        const data = await decryptionresponse(decryptedData);
         if (data.payload.status == 'ok') {
             digilocker_getfiles(data)
 
@@ -275,7 +277,7 @@ const digilocker_getfiles = async (requestid) => {
 
 
 
-    const user = encryptionrequestdata({
+    const user =await encryptionrequestdata({
         userToken: localStorage.getItem('userkey'),
         digilockerAction: "getFiles",
         digilockerReqId: requestid.payload.metaData.requestId,
@@ -298,7 +300,9 @@ const digilocker_getfiles = async (requestid) => {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();
+       
+             const decryptedData = await response.json();
+        const data = await decryptionresponse(decryptedData);
         if (data.payload.status == 'ok') {
 
             digilocker_getaadhardoc(requestid.payload.metaData.requestId)
@@ -328,7 +332,7 @@ const digilocker_getaadhardoc = async (requestid) => {
  const headertoken=htoken
     const authorization = headertoken;
 
-    const user = encryptionrequestdata({
+    const user =await encryptionrequestdata({
         userToken: localStorage.getItem('userkey'),
         digilockerAction: "createAadhaar",
         digilockerReqId: requestid,
@@ -351,7 +355,8 @@ const digilocker_getaadhardoc = async (requestid) => {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();
+            const decryptedData = await response.json();
+        const data = await decryptionresponse(decryptedData);
         if (data.payload.status == 'ok') {
 
             pagestatus('parmanentaddress')

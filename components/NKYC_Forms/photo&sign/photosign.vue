@@ -2,7 +2,7 @@
     <div class="primary_color">
         <div class="flex justify-between primary_color items-center px-3"
             :style="{ height: deviceHeight * 0.08 + 'px' }">
-            <logo  />
+            <logo style="width: 40px; height: 40px;" />
             <profile />
         </div>
         <div class="flex justify-between  p-2 flex-col bg-white rounded-t-3xl dark:bg-black"

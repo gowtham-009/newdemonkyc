@@ -87,15 +87,15 @@ const routeComponents = async (token) => {
       throw new Error(`Network request failed with status ${response.status}`);
     }
 
-    const data = await response.json();
-  
+    const decrytpdata = await response.json();
+    const data= await decryptionresponse(decrytpdata);
     if(data.payload.status=='ok' && data.payload.metaData.token){
         localStorage.setItem('userkey',data.payload.metaData.token)
         if(data.payload.metaData.token){
           
             const page=await pagestatus('takephoto') 
             if(page.payload.status=='ok'){
-               window.location.href='https://newdemonkyc.vercel.app'
+               window.location.href='https://nkcynewone.vercel.app'
             }
              
         }

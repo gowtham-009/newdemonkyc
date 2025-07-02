@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px" />
       <profile />
     </div>
 
@@ -141,7 +141,7 @@ const toggleSelection = async(value) => {
       if(mydata.payload.status=='ok'){
         camsbankdata();
       }
-      else if (mydata.payload.status == 'error') {
+     else if (mydata.payload.status == 'error') {
         if (mydata.payload.code == '1002' || mydata.payload.code=='1004'){
              alert(mydata.payload.message);
               localStorage.removeItem('userkey')
@@ -175,6 +175,7 @@ function extractTimestamp(filename) {
 }
 
 const initPage = async () => {
+    
   const queryval = route.query.ecres;
   const mydata = await getServerData();
 
@@ -188,6 +189,7 @@ const initPage = async () => {
     content.value = false;
     loading.value = true;
     intervalId = setInterval(() => {
+   
       camsbankdatacheck();
     }, 5000);
   } else if (statuscheck2 || statuscheck) {
@@ -198,6 +200,7 @@ const initPage = async () => {
       selected.value = 'CAMS';
       uploadedPDF.value=false
     } else {
+
       await getdatapdf()
       selected.value = 'Upload Last 6 Months Bank Statement PDF';
       buttonText.value = 'Upload Bank Statement';
@@ -211,7 +214,7 @@ const editPDF = () => {
   triggerUpload();
 };
 onMounted(async() => {
-  
+
   window.addEventListener('resize', () => {
     deviceHeight.value = window.innerHeight;
   });
@@ -221,9 +224,10 @@ onMounted(async() => {
 let checkCount = 0; 
 
 const camsbankdatacheck = async () => {
+ 
   const headertoken=htoken
   const apiurl = `${baseurl.value}cams`;
-  const user = encryptionrequestdata({
+  const user =await encryptionrequestdata({
     userToken: localStorage.getItem('userkey'),
     pageCode: 'thankyou',
     camsAction: 'checkCamsStatus',
@@ -239,10 +243,12 @@ const camsbankdatacheck = async () => {
       body: JSON.stringify({ payload: user }),
     });
 
-    const data = await response.json();
+    const decryptedData = await response.json();
+    const data = await decryptionresponse(decryptedData);
     const meta = data.payload?.metaData;
 
     if (data.payload.status === 'ok') {
+    
       const clienttrnxid1 = meta?.cams_create?.clienttrnxid;
       const clienttrnxid2 = meta?.cams_data?.clienttxnid;
       const consentStatus = meta?.cams_create?.consentStatus;
@@ -254,6 +260,7 @@ const camsbankdatacheck = async () => {
         consentStatus === 'ACTIVE' &&
         bankStatementFile
       ) {
+
         clearInterval(intervalId);
         const mydata = await pagestatus('thankyou');
         if (mydata.payload.status === 'ok') {
@@ -289,18 +296,23 @@ const camsbankdatacheck = async () => {
 };
 
 const camsbankdata = async () => {
+
   const headertoken=htoken
   const mydata = await getServerData();
   const ifscvalue = mydata?.payload?.metaData?.bank?.bank1IFSC;
 
   const apiurl = `${baseurl.value}cams`;
-  const user = encryptionrequestdata({
+  const user = await encryptionrequestdata({
     userToken: localStorage.getItem('userkey'),
     pageCode: 'csmspdf',
     camsAction: 'createCams',
     bankIfsc: ifscvalue,
-    redirecUrl: 'https://newdemonkyc.vercel.app/main',
+    redirecUrl: 'https://nkcynewone.vercel.app/main',
+
+   
   });
+
+
 
   try {
     const response = await fetch(apiurl, {
@@ -312,7 +324,8 @@ const camsbankdata = async () => {
       body: JSON.stringify({ payload: user }),
     });
 
-    const data = await response.json();
+    const decryptedData = await response.json();
+    const data = await decryptionresponse(decryptedData);
     if (data.payload.status === 'ok') {
       window.location.href = data.payload.metaData.redirectionurl;
     }
@@ -367,7 +380,7 @@ const bankstatement = async (pdfval) => {
     const response = await fetch(pdfval);
     const blob = await response.blob();
 
-    const user = encryptionrequestdata({
+    const user =await encryptionrequestdata({
       userToken: localStorage.getItem('userkey'),
       pageCode: 'thankyou'
     });
@@ -385,7 +398,8 @@ const bankstatement = async (pdfval) => {
       body: formData,
     });
 
-    const data = await uploadResponse.json();
+    const decryptedData = await uploadResponse.json();
+    const data = await decryptionresponse(decryptedData);
     if (data.payload.status === 'ok') {
       const pageroute = await pagestatus('thankyou');
       if (pageroute.payload.status === 'ok') {

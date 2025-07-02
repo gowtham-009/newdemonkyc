@@ -1,6 +1,7 @@
 
 
 import { encryptionrequestdata } from '~/utils/globaldata.js';
+import { decryptionresponse } from '~/utils/globaldata.js';
 
 export async function getServerData() {
 
@@ -8,10 +9,10 @@ export async function getServerData() {
 
   const userkey = localStorage.getItem('userkey') 
 
-  const encryptedUser = encryptionrequestdata({
+  const encryptedUser =await encryptionrequestdata({
     userToken: userkey,
   });
-
+console.log("Encrypted User:", encryptedUser);
   const payload = { payload: encryptedUser };
   const jsonString = JSON.stringify(payload);
 
@@ -30,8 +31,12 @@ export async function getServerData() {
     }
 
     const data = await response.json();
-   
-    return data;
+    const decryptedData = await decryptionresponse(data);
+    console.log("Decrypted Datalkihoiho:", decryptedData);
+
+    
+  
+    return decryptedData
   } catch (error) {
     console.error('Fetch error:', error);
     return null;

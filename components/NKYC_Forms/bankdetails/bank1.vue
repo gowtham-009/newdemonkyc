@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo />
+      <logo style="width: 40px; height: 40px;" />
       <profile />
     </div>
     <div class="flex justify-between  p-2 flex-col bg-white rounded-t-3xl dark:bg-black"
@@ -313,7 +313,7 @@ const bankvalidation = async () => {
   }
 
   const apiurl = `${baseurl.value}bank`;
-  const user = encryptionrequestdata({
+  const user =await encryptionrequestdata({
     userToken: localStorage.getItem('userkey'),
     pageCode: "bank4",
     bankAccType: selected.value,
@@ -343,7 +343,8 @@ const headertoken=htoken
       throw new Error('Network response was not ok ' + response.status);
     }
 
-    const data = await response.json();
+    const decryptedData = await response.json();
+       const data = await decryptionresponse(decryptedData);
       accnotypeerror.value=""
      accnoerror.value =""
      ifscerror.value=""

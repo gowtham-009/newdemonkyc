@@ -1,7 +1,7 @@
 <template>
   <div class="primary_color">
     <div class="flex justify-between primary_color items-center px-3" :style="{ height: deviceHeight * 0.08 + 'px' }">
-      <logo  />
+      <logo style="width: 40px; height: 40px;" />
        <profile />
     </div>
     <div class="flex justify-between  p-1 px-2 flex-col bg-white rounded-t-3xl dark:bg-black"
@@ -105,6 +105,7 @@ const setMobileData = async () => {
   try {
     const mydata = await getServerData();
     const kraresdata=getEncryptionData()
+    console.log("KRA Data:", kraresdata);
     const appKraMobile = kraresdata?.kradata?.decryptdata?.payload?.metaData?.KYC_DATA?.APP_MOB_NO || '';
     const profileMobile = mydata?.payload?.metaData?.profile?.mobileNo;
      const kraMobile = mydata?.payload?.metaData?.kraPan?.APP_MOB_NO;
@@ -156,10 +157,11 @@ onUnmounted(() => {
 
 
 const sendmobileotp = async (resend) => {
+
   isStatusValid.value = false;
   const apiurl = `${baseurl.value}validateMobile`;
   phoneNumber.value = mobileNo.value.replace(/^(\d{0,6})(\d{4})$/, '******$2');
-    const user = encryptionrequestdata({
+    const user =await encryptionrequestdata({
     otpType:'mobile',
     mobile: mobileNo.value,
     resend:'false',
@@ -179,8 +181,9 @@ const sendmobileotp = async (resend) => {
     body: jsonString,
   });
 
-  const data = await response.json(); // Read body regardless of status
-
+  const decryptedData = await response.json(); // Read body regardless of status
+const data = await decryptionresponse(decryptedData);
+console.log("Response Data:", data);
   if (!response.ok) {
     console.error("Error:", data.message);
     errormsg.value = data.message; // Show in UI
@@ -253,7 +256,7 @@ const otpverfication = async () => {
   errormobile.value = '';
   const usekey=localStorage.getItem('userkey')
   const apiurl = `${baseurl.value}validateMobile`;
-    const user = encryptionrequestdata({
+    const user =await encryptionrequestdata({
     userToken:usekey,
     mobile: mobileNo.value,
     verifyotp:'false',
@@ -273,8 +276,8 @@ const otpverfication = async () => {
     body: jsonString,
   });
 
-  const data = await response.json(); // Read body regardless of status
-
+  const decryptedData = await response.json(); // Read body regardless of status
+ const  data= await decryptionresponse(decryptedData);
   if (!response.ok) {
    
     console.error("Error:", data.message);
@@ -350,9 +353,11 @@ const mobile_signup = async (event) => {
     circle.remove();
 
     if(mobileotp.value==true){
+
       await otpverfication();
     }
     else{
+   
 await sendmobileotp();
     }
 
